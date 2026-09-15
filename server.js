@@ -35,11 +35,18 @@ async function registerTelegramGroup(ctx, topicId = null) {
     const existing = await Group.findOne({ chatId: chat.id });
     if (existing?.active || existing?.registrationUsedAt) return;
 
+    const telegramName = chat.title || String(chat.id);
+    const duplicateName = await Group.findOne({
+        name: telegramName,
+        ...(existing ? { _id: { $ne: existing._id } } : {})
+    }).lean();
+    const safeName = duplicateName ? `${telegramName} [${chat.id}]` : telegramName;
+
     await Group.findOneAndUpdate(
         { chatId: chat.id },
         {
             $set: {
-                name: chat.title || String(chat.id),
+                name: safeName,
                 ...(topicId ? { topicId } : {})
             },
             $setOnInsert: { active: false }

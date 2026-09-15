@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import * as crypto from 'node:crypto';
 import fs from 'fs/promises';
 import path from 'path';
 import { User } from '../models/User.js';
