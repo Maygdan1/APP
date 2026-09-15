@@ -53,7 +53,7 @@ export function renderCalendar() {
         if (summary.length) {
             const summaryElement = document.createElement('div');
             summaryElement.className = 'month-bday-summary';
-            summaryElement.innerHTML = summary.map(person => `<div class="bday-summary-row">📅 <b>${person.day} ${MONTHS_GENITIVE[monthIndex]}</b> — ${escapeHtml(person.name)} ${person.age || ''} ${escapeHtml(person.username ? `(@${person.username})` : '')} <span class="group-tag-inline">${escapeHtml(person.groups)}</span></div>`).join('');
+            summaryElement.innerHTML = summary.map(person => `<div class="bday-summary-row"> <b>${person.day} ${MONTHS_GENITIVE[monthIndex]}</b> — ${escapeHtml(person.name)} ${person.age || ''} ${escapeHtml(person.username ? `(@${person.username})` : '')} <span class="group-tag-inline">${escapeHtml(person.groups)}</span></div>`).join('');
             card.appendChild(summaryElement);
         }
         container.appendChild(card);

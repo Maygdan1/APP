@@ -15,8 +15,8 @@
 
     <nav class="admin-tabs">
         <button class="tab-btn active" data-tab="usersTab" title="Список" aria-label="Список">👥</button>
-        <button class="tab-btn" data-tab="profileTab" title="Профиль" aria-label="Профиль">👤</button>
         <button class="tab-btn" data-tab="calendarTab" title="Календарь" aria-label="Календарь">📅</button>
+        <button class="tab-btn" data-tab="mentorGroupsTab" title="Мои группы" aria-label="Мои группы">🏫</button>
         <button class="tab-btn" data-tab="actionsTab" title="Действия" aria-label="Действия">⚙️</button>
         <button class="tab-btn" data-tab="exportTab" title="Выгрузка" aria-label="Выгрузка">📥</button>
     </nav>
@@ -40,8 +40,14 @@
             <div id="userList" class="user-list"></div>
         </section>
 
-        <section id="profileTab" class="tab-content">
-            <div class="export-card" id="profileCard"></div>
+        <section id="mentorGroupsTab" class="tab-content">
+            <div class="calendar-controls-card">
+                <label class="field-label" for="mentorGroupsFilter">Отображать</label>
+                <div class="select-wrapper select-wrapper-no-arrow">
+                    <select id="mentorGroupsFilter"></select>
+                </div>
+            </div>
+            <div id="mentorGroupsList" class="user-list"></div>
         </section>
 
         <!-- ВКЛАДКА 2: Календарь -->
@@ -83,6 +89,7 @@
                 <button id="exportButton" class="btn-save" style="background-color: var(--success-color); margin-top: 16px;">
                     💾 Скачать таблицу (.csv)
                 </button>
+                <div id="exportResult" class="export-result" aria-live="polite"></div>
             </div>
         </section>
 

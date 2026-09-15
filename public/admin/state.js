@@ -6,7 +6,8 @@ export const state = {
         ownGroups: [],
     selectedCalendarGroups: [],
     selectedUsersGroup: '',
-    currentUser: null
+        currentUser: null,
+        selectedMentorGroup: '',
 };
 
 export const MONTH_NAMES = [

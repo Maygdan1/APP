@@ -91,12 +91,15 @@ async function consumeInvite(ctx, tokenValue) {
             { new: true }
         );
         if (!consumedInvite) return;
+        const telegramName = chat.title || String(chat.id);
+        const duplicateName = await Group.findOne({ name: telegramName, _id: { $ne: invite.groupId } }).lean();
+        const safeName = duplicateName ? `${telegramName} [${chat.id}]` : telegramName;
     await Group.findByIdAndUpdate(invite.groupId, {
         $set: {
             chatId: chat.id,
-            name: chat.title || String(chat.id),
+                name: safeName,
             topicId,
-            active: false,
+                active: true,
             registrationUsedAt: new Date(),
             registrationRequestedBy: ctx.from?.id || null
         }

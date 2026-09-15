@@ -1,7 +1,7 @@
 import { loadManagedGroups, saveManagedGroup, loadServiceSettings, saveServiceSettings, deleteManagedGroup, checkManagedGroup, generateGroupInvite, createBackup } from './groups.js';
 import { showAlert } from '../shared/telegram.js';
 import { state } from './state.js';
-import { loadUsers, filterUsers, filterUsersByGroup, handleGroupSelect, handleRoleChange, saveUserData, deleteUser } from './users.js';
+import { loadUsers, filterUsers, filterUsersByGroup, handleGroupSelect, handleRoleChange, saveUserData, deleteUser, renderMentorGroups } from './users.js';
 import { renderCalendar } from './calendar.js';
 import { setupExportSelect, exportGroupData } from './export.js';
 
@@ -19,6 +19,7 @@ document.getElementById('calendarGroups').addEventListener('change', event => {
 });
 document.getElementById('searchInput').addEventListener('input', event => filterUsers(event.target.value));
 document.getElementById('usersGroupFilter').addEventListener('change', event => filterUsersByGroup(event.target.value));
+document.getElementById('mentorGroupsFilter').addEventListener('change', event => renderMentorGroups(event.target.value));
 document.getElementById('exportButton').addEventListener('click', exportGroupData);
 document.getElementById('saveServiceSettings').addEventListener('click', saveServiceSettings);
 document.getElementById('createBackup').addEventListener('click', createBackup);
@@ -61,29 +62,20 @@ loadUsers().then(loaded => {
             calendarGroups.innerHTML = '<option value="">Все доступные группы</option>' + ownOption + availableGroups.map(group => `<option value="${group._id}">${group.name}</option>`).join('');
         const profileButton = document.querySelector('[data-tab="profileTab"]');
         const usersButton = document.querySelector('[data-tab="usersTab"]');
+        const mentorGroupsButton = document.querySelector('[data-tab="mentorGroupsTab"]');
+        const actionsButton = document.querySelector('[data-tab="actionsTab"]');
         if (state.role === 'mentor') {
-            usersButton.style.display = 'none';
-            profileButton.style.display = '';
-            switchTab('profileTab');
+            actionsButton.style.display = 'none';
+            mentorGroupsButton.style.display = '';
+            renderMentorGroups();
+            switchTab('usersTab');
         } else {
-            profileButton.style.display = 'none';
-            renderAdminProfile();
+            mentorGroupsButton.style.display = 'none';
+            actionsButton.style.display = '';
+            switchTab('usersTab');
         }
     }
 }).catch(error => {
     document.getElementById('loader').innerText = `Ошибка загрузки: ${error.message}`;
     showAlert(error.message);
 });
-
-function renderAdminProfile() {
-    const user = state.currentUser;
-    if (!user) return;
-    const groups = (user.group_ids || [])
-        .map(item => state.groups.find(group => String(group._id) === String(item._id))?.name)
-        .filter(Boolean);
-    document.getElementById('profileCard').innerHTML = `
-        <h3>Профиль наставника</h3>
-        <p><b>Имя:</b> ${user.username || 'Не указано'}</p>
-        <p><b>Роль:</b> Наставник</p>
-        <p><b>Прикрепленные группы:</b> ${groups.length ? groups.join(', ') : 'Не назначены'}</p>`;
-}

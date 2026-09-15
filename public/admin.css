@@ -72,6 +72,21 @@ body {
 
 .admin-container { max-width: 520px; margin: 0 auto; }
 
+.export-result {
+    margin-top: 16px;
+}
+
+.export-result a {
+    display: block;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--button-color);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    text-decoration: none;
+}
+
 /* ПОЛЕ ПОИСКА (СТИЛИ ВОССТАНОВЛЕНЫ) */
 .controls-bar {
     margin-bottom: 18px;

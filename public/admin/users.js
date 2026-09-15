@@ -42,6 +42,7 @@ export async function loadUsers() {
     state.groups = data.groups || [];
     state.mentorGroups = (data.mentorGroups || []).map(group => group._id);
     state.ownGroups = (data.currentUser?.group_ids || []).map(group => String(group._id));
+        state.adminCount = state.users.filter(user => user.role === 'admin').length;
     document.getElementById('controls').style.display = 'block';
     document.getElementById('searchInput').style.display = state.role === 'mentor' ? 'none' : '';
     const groupFilter = document.getElementById('usersGroupFilter');
@@ -49,7 +50,13 @@ export async function loadUsers() {
         ? state.groups
         : state.groups.filter(group => state.mentorGroups.some(id => String(id) === String(group._id)));
     groupFilter.innerHTML = '<option value="">Все доступные группы</option>' + filterGroups.map(group => `<option value="${group._id}">${escapeHtml(group.name)}</option>`).join('');
-    renderUsers(state.users);
+    const currentUserId = String(state.currentUser?._id || '');
+    const orderedUsers = [...state.users].sort((left, right) => {
+        if (String(left._id) === currentUserId) return -1;
+        if (String(right._id) === currentUserId) return 1;
+        return 0;
+    });
+    renderUsers(orderedUsers);
     return true;
 }
 
@@ -87,7 +94,7 @@ export function renderUsers(users) {
                 <option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Администратор</option>
             </select></div></div>
             <div class="field-group"><label>${isAdmin ? 'Привязанные группы:' : 'Ваши группы:'}</label><div class="${isAdmin ? 'groups-grid' : 'mentor-groups-container'}">${groupsHtml}</div></div>
-            ${isAdmin ? `<button class="btn-save" data-action="save-user" data-user-id="${user._id}">Сохранить</button><button class="btn-save btn-danger" data-action="delete-user" data-user-id="${user._id}">Удалить</button>` : '<div class="muted">🔒 Вашу роль и группы регулирует Главный Администратор</div>'}`;
+            ${isAdmin ? `<button class="btn-save" data-action="save-user" data-user-id="${user._id}">Сохранить</button>${!(isAdminUser && (state.adminCount <= 1 || String(user._id) === String(state.currentUser?._id))) ? `<button class="btn-save btn-danger" data-action="delete-user" data-user-id="${user._id}">Удалить</button>` : ''}` : '<div class="muted">🔒 Вашу роль и группы регулирует Главный Администратор</div>'}`;
         container.appendChild(card);
     });
 }
@@ -104,6 +111,19 @@ export function filterUsers(query) {
 export function filterUsersByGroup(groupId) {
     state.selectedUsersGroup = groupId;
     filterUsers(document.getElementById('searchInput').value);
+}
+
+export function renderMentorGroups(groupId = '') {
+    const groups = state.groups.filter(group => state.mentorGroups.some(id => String(id) === String(group._id)));
+    const filter = document.getElementById('mentorGroupsFilter');
+    filter.innerHTML = '<option value="">Все мои группы</option>' + groups.map(group => `<option value="${group._id}">${escapeHtml(group.name)}</option>`).join('');
+    filter.value = groupId;
+    const visible = groupId ? groups.filter(group => String(group._id) === groupId) : groups;
+    document.getElementById('mentorGroupsList').innerHTML = visible.map(group => `
+        <div class="user-card">
+            <div class="user-name">📚 ${escapeHtml(group.name)}</div>
+            <div class="user-info">Chat ID: <b>${group.chatId}</b><br>Topic ID: <b>${group.topicId ?? 'общий чат'}</b></div>
+        </div>`).join('') || '<div class="muted">Группы не назначены</div>';
 }
 
 export async function deleteUser(userId) {

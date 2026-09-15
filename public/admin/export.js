@@ -20,10 +20,9 @@ export function exportGroupData() {
         rows.push([user.username || 'Без имени', user.tg_username ? `@${user.tg_username.replace('@', '')}` : '', user.role === 'mentor' ? 'Наставник' : 'Студент', formatDateToRussian(user.birthday, MONTHS_GENITIVE), groups]);
     });
     const csv = `\uFEFF${rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\n')}`;
+    const result = document.getElementById('exportResult');
+    if (result.dataset.url) URL.revokeObjectURL(result.dataset.url);
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Дни_Рождения_${group?.name || 'Мои_группы'}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    result.dataset.url = url;
+    result.innerHTML = `<a href="${url}" download="Дни_Рождения_${group?.name || 'Мои_группы'}.csv">⬇️ Скачать сформированный файл</a>`;
 }
