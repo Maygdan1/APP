@@ -7,6 +7,15 @@ const user = tg.initDataUnsafe?.user;
 const birthdayInput = document.getElementById('birthdayInput');
 const nameInput = document.getElementById('nameInput');
 
+function updateMainButton(tabId) {
+    if (tabId === 'formTab') {
+        tg.MainButton.setText('Сохранить');
+        tg.MainButton.show();
+    } else {
+        tg.MainButton.hide();
+    }
+}
+
 nameInput.addEventListener('input', event => {
     event.target.value = event.target.value
         .replace(/[^А-Яа-яЁё]/g, '')
@@ -19,6 +28,7 @@ nameInput.addEventListener('input', event => {
 document.querySelectorAll('.student-tabs .tab-btn').forEach(button => button.addEventListener('click', async () => {
     document.querySelectorAll('.student-tabs .tab-btn').forEach(item => item.classList.toggle('active', item === button));
     document.querySelectorAll('body > .tab-content').forEach(tab => tab.classList.toggle('active-content', tab.id === button.dataset.tab));
+    updateMainButton(button.dataset.tab);
     if (button.dataset.tab === 'calendarTab') await loadStudentCalendar();
 }));
 
@@ -101,7 +111,7 @@ birthdayInput.addEventListener('keydown', event => {
 tg.MainButton.setText('Сохранить');
 tg.MainButton.textColor = '#FFFFFF';
 tg.MainButton.color = tg.themeParams.button_color || '#2481cc';
-tg.MainButton.show();
+updateMainButton('formTab');
 tg.MainButton.onClick(async () => {
     const username = nameInput.value.trim();
     const groupId = document.getElementById('groupSelect').value;

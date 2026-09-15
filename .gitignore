@@ -12,7 +12,7 @@ backup_users_before_migration.json
 backup_users*.json
 *.dump
 *.bson
-
+scripts/
 # Local-only scripts and temporary files
 scripts/local/
 *.local.js
