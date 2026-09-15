@@ -16,6 +16,10 @@ function updateMainButton(tabId) {
     }
 }
 
+function showFormButton() {
+    updateMainButton('formTab');
+}
+
 nameInput.addEventListener('input', event => {
     event.target.value = event.target.value
         .replace(/[^А-Яа-яЁё]/g, '')
@@ -44,6 +48,7 @@ async function loadStudentCalendar() {
 
 function closeModal(id) {
     document.getElementById(id).style.display = 'none';
+    if (id === 'welcomeModal' || id === 'adminChoiceModal') showFormButton();
 }
 
 function closeTelegramApp() {
@@ -111,7 +116,7 @@ birthdayInput.addEventListener('keydown', event => {
 tg.MainButton.setText('Сохранить');
 tg.MainButton.textColor = '#FFFFFF';
 tg.MainButton.color = tg.themeParams.button_color || '#2481cc';
-updateMainButton('formTab');
+tg.MainButton.hide();
 tg.MainButton.onClick(async () => {
     const username = nameInput.value.trim();
     const groupId = document.getElementById('groupSelect').value;
