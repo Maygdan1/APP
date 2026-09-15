@@ -130,6 +130,16 @@ body {
     font-size: 20px;
 }
 
+.file-open {
+    min-height: 42px;
+    padding: 0 10px;
+    border: 1px solid var(--button-color);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-color);
+    font-weight: 700;
+}
+
 /* ПОЛЕ ПОИСКА (СТИЛИ ВОССТАНОВЛЕНЫ) */
 .controls-bar {
     margin-bottom: 18px;
@@ -167,6 +177,12 @@ body {
     justify-content: space-between; 
     align-items: center; 
     margin-bottom: 12px; 
+}
+
+.user-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 .user-name { font-weight: 700; font-size: 16px; }
 .user-handle { font-size: 13px; color: var(--button-color); margin-left: 6px; font-weight: 600; }
@@ -380,6 +396,15 @@ select[multiple]::-webkit-scrollbar-thumb {
     font-size: 14px;
     font-weight: 700;
     list-style-position: inside;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.summary-trash {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
 }
 
 .managed-group[open] summary {

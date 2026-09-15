@@ -87,14 +87,17 @@ export function renderUsers(users) {
         card.innerHTML = `
             <div class="user-header">
                 <div><span class="user-name">${escapeHtml(user.username || 'Без имени')}</span><span class="user-handle">${escapeHtml(user.tg_username ? `@${user.tg_username.replace('@', '')}` : 'нет @username')}</span></div>
-                <span class="role-badge ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}">${isAdminUser ? '🛡️ Администратор' : isMentor ? '👑 Наставник' : '🎓 Студент'}</span>
+                <div class="user-header-actions">
+                    <span class="role-badge ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}">${isAdminUser ? '🛡️ Администратор' : isMentor ? '👑 Наставник' : '🎓 Студент'}</span>
+                    ${isAdmin && !(isAdminUser && (state.adminCount <= 1 || String(user._id) === String(state.currentUser?._id))) ? `<button class="icon-action icon-trash" title="Удалить карточку" aria-label="Удалить карточку" data-action="delete-user" data-user-id="${user._id}">🗑️</button>` : ''}
+                </div>
             </div>
             <div class="user-info">🎂 День рождения: <b>${formatDateToRussian(user.birthday, ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'])}</b></div>
             <div class="field-group"><label>Роль в системе:</label><div class="select-wrapper"><select id="role-${user._id}" ${isAdmin ? '' : 'disabled'}>
                 <option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Администратор</option>
             </select></div></div>
             <div class="field-group"><label>${isAdmin ? 'Привязанные группы:' : 'Ваши группы:'}</label><div class="${isAdmin ? 'groups-grid' : 'mentor-groups-container'}">${groupsHtml}</div></div>
-            ${isAdmin ? `<div class="card-actions"><button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-action="save-user" data-user-id="${user._id}">☁</button>${!(isAdminUser && (state.adminCount <= 1 || String(user._id) === String(state.currentUser?._id))) ? `<button class="icon-action icon-trash" title="Удалить карточку" aria-label="Удалить карточку" data-action="delete-user" data-user-id="${user._id}">🗑️</button>` : ''}</div>` : '<div class="muted">🔒 Вашу роль и группы регулирует Главный Администратор</div>'}`;
+            ${isAdmin ? `<div class="card-actions"><button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-action="save-user" data-user-id="${user._id}">☁</button></div>` : '<div class="muted">🔒 Вашу роль и группы регулирует Главный Администратор</div>'}`;
         container.appendChild(card);
     });
 }

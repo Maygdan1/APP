@@ -16,18 +16,37 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     function createDownload(content, contentType, fileName) {
         const token = crypto.randomBytes(32).toString('base64url');
         downloads.set(token, { content, contentType, fileName, expiresAt: Date.now() + 5 * 60 * 1000 });
-        return `/api/files/${token}`;
+        return { downloadUrl: `/api/files/${token}`, viewUrl: `/api/files/${token}/view` };
     }
 
-    router.get('/files/:token', (req, res) => {
+    function getStoredFile(req, res) {
         const file = downloads.get(req.params.token);
         if (!file || file.expiresAt < Date.now()) {
             downloads.delete(req.params.token);
-            return res.status(404).send('File expired');
+            res.status(404).send('File expired');
+            return null;
         }
+        return file;
+    }
+
+    router.get('/files/:token', (req, res) => {
+        const file = getStoredFile(req, res);
+        if (!file) return;
         downloads.delete(req.params.token);
         res.setHeader('Content-Type', file.contentType);
-        res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+        const fallbackName = file.fileName.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
+        const encodedName = encodeURIComponent(file.fileName);
+        res.setHeader('Content-Disposition', `attachment; filename="${fallbackName}"; filename*=UTF-8''${encodedName}`);
+        res.setHeader('Cache-Control', 'no-store');
+        res.send(file.content);
+    });
+
+    router.get('/files/:token/view', (req, res) => {
+        const file = getStoredFile(req, res);
+        if (!file) return;
+        res.setHeader('Content-Type', file.contentType);
+        res.setHeader('Content-Disposition', 'inline');
+        res.setHeader('Cache-Control', 'no-store');
         res.send(file.content);
     });
 
@@ -161,7 +180,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
         try {
             const users = await User.find().lean();
             const content = `${JSON.stringify(users, null, 2)}\n`;
-            res.json({ url: createDownload(content, 'application/json; charset=utf-8', `birthday-users-${new Date().toISOString().slice(0, 10)}.json`) });
+            res.json(createDownload(content, 'application/json; charset=utf-8', `birthday-users-${new Date().toISOString().slice(0, 10)}.json`));
         } catch (error) {
             res.status(500).json({ error: `Не удалось сформировать JSON: ${error.message}` });
         }
@@ -193,7 +212,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
             });
             const csv = `\uFEFF${rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\n')}`;
             const safeName = selectedGroup && selectedGroup !== 'all' ? 'группа' : 'все-группы';
-            res.json({ url: createDownload(csv, 'text/csv; charset=utf-8', `Дни_Рождения_${safeName}.csv`) });
+            res.json(createDownload(csv, 'text/csv; charset=utf-8', `Дни_Рождения_${safeName}.csv`));
         } catch (error) {
             res.status(500).json({ error: `Не удалось сформировать CSV: ${error.message}` });
         }

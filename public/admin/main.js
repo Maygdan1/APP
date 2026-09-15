@@ -33,7 +33,11 @@ document.getElementById('managedGroups').addEventListener('click', event => {
     const button = event.target.closest('[data-save-group]');
     if (button) saveManagedGroup(button.dataset.saveGroup);
     const deleteButton = event.target.closest('[data-delete-group]');
-    if (deleteButton) requestDeleteConfirmation(() => deleteManagedGroup(deleteButton.dataset.deleteGroup));
+    if (deleteButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        requestDeleteConfirmation(() => deleteManagedGroup(deleteButton.dataset.deleteGroup));
+    }
     const checkButton = event.target.closest('[data-check-group]');
     if (checkButton) checkManagedGroup(checkButton.dataset.checkGroup);
     const inviteButton = event.target.closest('[data-invite-group]');

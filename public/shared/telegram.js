@@ -24,6 +24,14 @@ export function downloadFile(url, fileName) {
     link.click();
 }
 
+export function openFile(url) {
+    if (typeof tg.openLink === 'function') {
+        tg.openLink(url);
+        return;
+    }
+    window.open(url, '_blank', 'noopener');
+}
+
 let sessionToken = sessionStorage.getItem('session_token');
 
 async function ensureSession() {

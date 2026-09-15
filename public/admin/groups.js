@@ -1,4 +1,4 @@
-import { API_URL, apiFetch, downloadFile, showAlert } from '../shared/telegram.js';
+import { API_URL, apiFetch, downloadFile, openFile, showAlert } from '../shared/telegram.js';
 
 export async function loadServiceSettings() {
     const response = await apiFetch(`${API_URL}/api/admin/settings`);
@@ -61,7 +61,7 @@ export async function loadManagedGroups() {
     const container = document.getElementById('managedGroups');
     container.innerHTML = groups.map(group => `
         <details class="managed-group">
-            <summary>${group.name} (${group.active ? 'активна' : 'обнаружена'})</summary>
+            <summary><span>${group.name} (${group.active ? 'активна' : 'обнаружена'})</span><button class="summary-trash icon-action icon-trash" type="button" title="Удалить группу" aria-label="Удалить группу" data-delete-group="${group._id}">🗑️</button></summary>
             <div class="managed-group-body">
             <input data-group-name="${group._id}" value="${group.name}" placeholder="Название">
             <input data-group-topic="${group._id}" type="number" value="${group.topicId ?? ''}" placeholder="Topic ID">
@@ -109,6 +109,7 @@ export async function createBackup() {
     }
     const result = document.getElementById('backupResult');
     const data = await response.json();
-    result.innerHTML = `<div class="file-card"><span class="file-icon">🗄️</span><span class="file-meta"><b>birthday-users.json</b><small>Файл готов</small></span><button class="file-download" type="button">⬇️</button></div>`;
-    result.querySelector('.file-download').addEventListener('click', () => downloadFile(new URL(data.url, API_URL).href, 'birthday-users.json'));
+    result.innerHTML = `<div class="file-card"><span class="file-icon">🗄️</span><span class="file-meta"><b>birthday-users.json</b><small>Файл готов</small></span><button class="file-open" type="button">Открыть</button><button class="file-download" type="button">⬇️</button></div>`;
+    result.querySelector('.file-open').addEventListener('click', () => openFile(new URL(data.viewUrl, API_URL).href));
+    result.querySelector('.file-download').addEventListener('click', () => downloadFile(new URL(data.downloadUrl, API_URL).href, 'birthday-users.json'));
 }
