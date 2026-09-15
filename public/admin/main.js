@@ -1,7 +1,7 @@
 import { createGroup, loadManagedGroups, saveManagedGroup, loadServiceSettings, saveServiceSettings, deleteManagedGroup, checkManagedGroup, generateGroupInvite, createBackup } from './groups.js';
 import { showAlert } from '../shared/telegram.js';
 import { state } from './state.js';
-import { loadUsers, filterUsers, handleGroupSelect, handleRoleChange, saveUserData } from './users.js';
+import { loadUsers, filterUsers, filterUsersByGroup, handleGroupSelect, handleRoleChange, saveUserData, deleteUser } from './users.js';
 import { renderCalendar } from './calendar.js';
 import { setupExportSelect, exportGroupData } from './export.js';
 
@@ -18,6 +18,7 @@ document.getElementById('calendarGroups').addEventListener('change', event => {
     renderCalendar();
 });
 document.getElementById('searchInput').addEventListener('input', event => filterUsers(event.target.value));
+document.getElementById('usersGroupFilter').addEventListener('change', event => filterUsersByGroup(event.target.value));
 document.getElementById('exportButton').addEventListener('click', exportGroupData);
 document.getElementById('createGroupButton').addEventListener('click', createGroup);
 document.getElementById('saveServiceSettings').addEventListener('click', saveServiceSettings);
@@ -42,6 +43,8 @@ document.getElementById('userList').addEventListener('change', event => {
 document.getElementById('userList').addEventListener('click', event => {
     const button = event.target.closest('[data-action="save-user"]');
     if (button) saveUserData(button.dataset.userId);
+    const deleteButton = event.target.closest('[data-action="delete-user"]');
+    if (deleteButton) deleteUser(deleteButton.dataset.userId);
 });
 
 loadUsers().then(loaded => {

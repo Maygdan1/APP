@@ -44,6 +44,11 @@ export async function loadUsers() {
     state.ownGroups = (data.currentUser?.group_ids || []).map(group => String(group._id));
     document.getElementById('controls').style.display = 'block';
     document.getElementById('searchInput').style.display = state.role === 'mentor' ? 'none' : '';
+    const groupFilter = document.getElementById('usersGroupFilter');
+    const filterGroups = state.role === 'admin'
+        ? state.groups
+        : state.groups.filter(group => state.mentorGroups.some(id => String(id) === String(group._id)));
+    groupFilter.innerHTML = '<option value="">Все доступные группы</option>' + filterGroups.map(group => `<option value="${group._id}">${escapeHtml(group.name)}</option>`).join('');
     renderUsers(state.users);
     return true;
 }
@@ -82,14 +87,31 @@ export function renderUsers(users) {
                 <option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Администратор</option>
             </select></div></div>
             <div class="field-group"><label>${isAdmin ? 'Привязанные группы:' : 'Ваши группы:'}</label><div class="${isAdmin ? 'groups-grid' : 'mentor-groups-container'}">${groupsHtml}</div></div>
-            ${isAdmin ? `<button class="btn-save" data-action="save-user" data-user-id="${user._id}">Сохранить</button>` : '<div class="muted">🔒 Вашу роль и группы регулирует Главный Администратор</div>'}`;
+            ${isAdmin ? `<button class="btn-save" data-action="save-user" data-user-id="${user._id}">Сохранить</button><button class="btn-save btn-danger" data-action="delete-user" data-user-id="${user._id}">Удалить</button>` : '<div class="muted">🔒 Вашу роль и группы регулирует Главный Администратор</div>'}`;
         container.appendChild(card);
     });
 }
 
 export function filterUsers(query) {
     const normalized = query.toLowerCase();
-    renderUsers(state.users.filter(user => (user.username || '').toLowerCase().includes(normalized) || (user.tg_username || '').toLowerCase().includes(normalized)));
+    renderUsers(state.users.filter(user => {
+        const matchesText = (user.username || '').toLowerCase().includes(normalized) || (user.tg_username || '').toLowerCase().includes(normalized);
+        const matchesGroup = !state.selectedUsersGroup || (user.group_ids || []).some(group => String(group._id) === state.selectedUsersGroup);
+        return matchesText && matchesGroup;
+    }));
+}
+
+export function filterUsersByGroup(groupId) {
+    state.selectedUsersGroup = groupId;
+    filterUsers(document.getElementById('searchInput').value);
+}
+
+export async function deleteUser(userId) {
+    if (!confirm('Удалить пользователя из базы данных? Это действие нельзя отменить.')) return;
+    const response = await apiFetch(`${API_URL}/api/admin/users/${userId}`, { method: 'DELETE' });
+    const data = await response.json();
+    showAlert(response.ok ? 'Пользователь удален' : data.error || 'Не удалось удалить пользователя');
+    if (response.ok) await loadUsers();
 }
 
 export async function saveUserData(userId) {

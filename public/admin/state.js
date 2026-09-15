@@ -5,6 +5,7 @@ export const state = {
     mentorGroups: [],
         ownGroups: [],
     selectedCalendarGroups: [],
+    selectedUsersGroup: '',
     currentUser: null
 };
 

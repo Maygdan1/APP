@@ -82,6 +82,21 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
         res.json({ success: true, user });
     });
 
+    router.delete('/admin/users/:userId', requireSession, requireAdmin, async (req, res) => {
+        if (!mongoose.isValidObjectId(req.params.userId)) return res.status(400).json({ error: 'Некорректный пользователь' });
+        if (String(req.auth.user?._id) === String(req.params.userId)) {
+            return res.status(400).json({ error: 'Нельзя удалить свою учетную запись' });
+        }
+        const user = await User.findById(req.params.userId).lean();
+        if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+        if (user.role === 'admin' && await User.countDocuments({ role: 'admin' }) <= 1) {
+            return res.status(400).json({ error: 'Нельзя удалить последнего администратора' });
+        }
+        await User.deleteOne({ _id: req.params.userId });
+        await birthdayService.syncLocalBackup();
+        res.json({ success: true });
+    });
+
     router.post('/admin/groups', requireSession, requireAdmin, async (req, res) => {
         const { name, chatId, topicId } = req.body || {};
         if (!name || !Number.isSafeInteger(Number(chatId))) return res.status(400).json({ error: 'Название и числовой Chat ID обязательны' });

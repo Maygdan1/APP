@@ -349,6 +349,10 @@ select[multiple]::-webkit-scrollbar-thumb {
     margin-top: 6px;
 }
 
+.btn-danger {
+    background-color: var(--danger-color);
+}
+
 /* КАЛЕНДАРНАЯ СЕТКА И СПИСОК */
 .month-card {
     background-color: var(--secondary-bg);
