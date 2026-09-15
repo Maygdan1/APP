@@ -144,6 +144,10 @@ body {
     pointer-events: none;
 }
 
+.select-wrapper-no-arrow::after {
+    display: none;
+}
+
 select {
     width: 100%;
     appearance: none;
@@ -226,8 +230,8 @@ select[multiple] option {
 }
 
 select[multiple] option:checked {
-    background: var(--button-color);
-    color: #fff;
+    background: var(--bg-color);
+    color: var(--text-color);
 }
 
 select[multiple]::-webkit-scrollbar {
@@ -273,6 +277,39 @@ select[multiple]::-webkit-scrollbar-thumb {
     margin-bottom: 18px;
 }
 
+.group-create-form {
+    display: grid;
+    gap: 14px;
+    margin: 16px 0 20px;
+}
+
+.managed-group {
+    margin-top: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: var(--bg-color);
+    overflow: hidden;
+}
+
+.managed-group summary {
+    cursor: pointer;
+    padding: 14px;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 700;
+    list-style-position: inside;
+}
+
+.managed-group[open] summary {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.managed-group-body {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+}
+
 #createBackup {
     margin-bottom: 20px;
 }
@@ -310,6 +347,16 @@ select[multiple]::-webkit-scrollbar-thumb {
     padding: 18px;
     margin-bottom: 20px;
     border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.month-card .days-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (min-width: 560px) {
+    .month-card .days-grid {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
 }
 
 .month-title {

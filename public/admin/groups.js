@@ -46,8 +46,9 @@ export async function loadManagedGroups() {
     const { groups } = await response.json();
     const container = document.getElementById('managedGroups');
     container.innerHTML = groups.map(group => `
-        <div class="field-group">
-            <label>${group.name} (${group.active ? 'активна' : 'обнаружена'})</label>
+        <details class="managed-group">
+            <summary>${group.name} (${group.active ? 'активна' : 'обнаружена'})</summary>
+            <div class="managed-group-body">
             <input data-group-name="${group._id}" value="${group.name}" placeholder="Название">
             <input data-group-topic="${group._id}" type="number" value="${group.topicId ?? ''}" placeholder="Topic ID">
             <label><input data-group-active="${group._id}" type="checkbox" ${group.active ? 'checked' : ''}> Использовать для рассылки</label>
@@ -57,7 +58,8 @@ export async function loadManagedGroups() {
             <input data-group-invite="${group._id}" readonly placeholder="Сообщение появится здесь">
             <button class="btn-save" data-check-group="${group._id}">Проверить бота</button>
             <button class="btn-save" data-delete-group="${group._id}" style="background-color: var(--danger-color);">Удалить</button>
-        </div>`).join('');
+            </div>
+        </details>`).join('');
 }
 
 export async function saveManagedGroup(groupId) {

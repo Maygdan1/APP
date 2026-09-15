@@ -54,7 +54,7 @@ loadUsers().then(loaded => {
             ? state.groups
             : state.groups.filter(group => state.mentorGroups.some(id => String(id) === String(group._id)));
         const ownOption = state.role === 'admin' && state.ownGroups.length
-            ? '<option value="__mine__">Мои группы (я наставник)</option>'
+            ? '<option value="__mine__">Мои группы</option>'
             : '';
         calendarGroups.innerHTML = '<option value="">Все доступные группы</option>' + ownOption + availableGroups.map(group => `<option value="${group._id}">${group.name}</option>`).join('');
         const profileButton = document.querySelector('[data-tab="profileTab"]');
