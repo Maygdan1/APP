@@ -22,7 +22,15 @@ export function exportGroupData() {
     const csv = `\uFEFF${rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\n')}`;
     const result = document.getElementById('exportResult');
     if (result.dataset.url) URL.revokeObjectURL(result.dataset.url);
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const filename = `Дни_Рождения_${group?.name || 'Мои_группы'}.csv`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     result.dataset.url = url;
-    result.innerHTML = `<a href="${url}" download="Дни_Рождения_${group?.name || 'Мои_группы'}.csv">⬇️ Скачать сформированный файл</a>`;
+    result.innerHTML = `<div class="file-card"><span class="file-icon">📄</span><span class="file-meta"><b>${escapeHtml(filename)}</b><small>${Math.ceil(blob.size / 1024)} КБ · CSV</small></span><button class="file-download" type="button">⬇️</button></div>`;
+    result.querySelector('.file-download').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+    });
 }

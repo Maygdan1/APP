@@ -93,10 +93,16 @@ export async function createBackup() {
     }
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `birthday-users-${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-    showAlert('Бэкап скачан на устройство');
+    const result = document.getElementById('backupResult');
+    if (result.dataset.url) URL.revokeObjectURL(result.dataset.url);
+    const filename = `birthday-users-${new Date().toISOString().slice(0, 10)}.json`;
+    result.dataset.url = url;
+    result.innerHTML = `<div class="file-card"><span class="file-icon">🗄️</span><span class="file-meta"><b>${filename}</b><small>${Math.ceil(blob.size / 1024)} КБ · JSON</small></span><button class="file-download" type="button">⬇️</button></div>`;
+    result.querySelector('.file-download').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+    });
+    showAlert('Файл готов к скачиванию');
 }

@@ -16,7 +16,6 @@
     <nav class="admin-tabs">
         <button class="tab-btn active" data-tab="usersTab" title="Список" aria-label="Список">👥</button>
         <button class="tab-btn" data-tab="calendarTab" title="Календарь" aria-label="Календарь">📅</button>
-        <button class="tab-btn" data-tab="mentorGroupsTab" title="Мои группы" aria-label="Мои группы">🏫</button>
         <button class="tab-btn" data-tab="actionsTab" title="Действия" aria-label="Действия">⚙️</button>
         <button class="tab-btn" data-tab="exportTab" title="Выгрузка" aria-label="Выгрузка">📥</button>
     </nav>
@@ -38,16 +37,6 @@
                 </div>
             </div>
             <div id="userList" class="user-list"></div>
-        </section>
-
-        <section id="mentorGroupsTab" class="tab-content">
-            <div class="calendar-controls-card">
-                <label class="field-label" for="mentorGroupsFilter">Отображать</label>
-                <div class="select-wrapper select-wrapper-no-arrow">
-                    <select id="mentorGroupsFilter"></select>
-                </div>
-            </div>
-            <div id="mentorGroupsList" class="user-list"></div>
         </section>
 
         <!-- ВКЛАДКА 2: Календарь -->
@@ -91,6 +80,12 @@
                 </button>
                 <div id="exportResult" class="export-result" aria-live="polite"></div>
             </div>
+            <div id="backupBlock" class="export-card" style="display: none;">
+                <h3>🗄️ Резервная копия</h3>
+                <p>JSON-файл со всеми пользователями для сохранения на устройство.</p>
+                <button id="createBackup" class="btn-save">Сформировать JSON-бэкап</button>
+                <div id="backupResult" class="export-result" aria-live="polite"></div>
+            </div>
         </section>
 
         <section id="actionsTab" class="tab-content">
@@ -104,8 +99,8 @@
                     <input id="maxPendingGroupRequests" class="limit-input" type="number" min="1" max="10" step="1" value="5" inputmode="numeric">
                 </label>
                 <button id="saveServiceSettings" class="btn-save">Сохранить настройки</button>
-                <h3 style="margin-top: 22px;">Резервная копия</h3>
-                <button id="createBackup" class="btn-save">Создать бэкап пользователей</button>
+            </div>
+            <div class="export-card">
                 <h3 style="margin-top: 22px;">Запросы и группы</h3>
                 <div id="managedGroups"></div>
             </div>

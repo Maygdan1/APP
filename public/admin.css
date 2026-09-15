@@ -87,6 +87,49 @@ body {
     text-decoration: none;
 }
 
+.file-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-color);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+}
+
+.file-icon {
+    font-size: 26px;
+}
+
+.file-meta {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.file-meta b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-meta small {
+    color: var(--hint-color);
+}
+
+.file-download {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--button-color);
+    color: #fff;
+    font-size: 20px;
+}
+
 /* ПОЛЕ ПОИСКА (СТИЛИ ВОССТАНОВЛЕНЫ) */
 .controls-bar {
     margin-bottom: 18px;
