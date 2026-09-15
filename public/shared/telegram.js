@@ -12,6 +12,18 @@ export function showAlert(message) {
     }
 }
 
+export function downloadFile(url, fileName) {
+    if (typeof tg.downloadFile === 'function') {
+        tg.downloadFile({ url, file_name: fileName }, () => {});
+        return;
+    }
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.rel = 'noopener';
+    link.click();
+}
+
 let sessionToken = sessionStorage.getItem('session_token');
 
 async function ensureSession() {

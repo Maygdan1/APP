@@ -392,6 +392,36 @@ select[multiple]::-webkit-scrollbar-thumb {
     padding: 16px;
 }
 
+.invite-copy-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.invite-copy-row input {
+    min-width: 0;
+    flex: 1;
+}
+
+.copy-invite {
+    flex: 0 0 48px;
+    border: 1px solid var(--button-color);
+    border-radius: 10px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 20px;
+}
+
+.copy-invite:not(:disabled) {
+    cursor: pointer;
+    background: var(--button-color);
+    color: #fff;
+}
+
+.copy-invite:disabled {
+    opacity: 0.45;
+}
+
 #createBackup {
     margin-bottom: 20px;
 }

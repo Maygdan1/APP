@@ -1,4 +1,4 @@
-import { API_URL, apiFetch, showAlert } from '../shared/telegram.js';
+import { API_URL, apiFetch, downloadFile, showAlert } from '../shared/telegram.js';
 
 export async function loadServiceSettings() {
     const response = await apiFetch(`${API_URL}/api/admin/settings`);
@@ -37,7 +37,21 @@ export async function deleteManagedGroup(groupId) {
         const field = document.querySelector(`[data-group-invite="${groupId}"]`);
         field.value = data.message;
         field.select();
+        document.querySelector(`[data-copy-group="${groupId}"]`).disabled = false;
         showAlert('Приглашение создано. Скопируйте его и передайте ответственному.');
+    }
+
+    export async function copyGroupInvite(groupId) {
+        const field = document.querySelector(`[data-group-invite="${groupId}"]`);
+        if (!field?.value) return showAlert('Сначала сгенерируйте приглашение');
+        try {
+            await navigator.clipboard.writeText(field.value);
+        } catch {
+            field.focus();
+            field.select();
+            document.execCommand('copy');
+        }
+        showAlert('Приглашение скопировано');
     }
 
 export async function loadManagedGroups() {
@@ -55,7 +69,10 @@ export async function loadManagedGroups() {
             <label><input data-group-blocked="${group._id}" type="checkbox" ${group.blocked ? 'checked' : ''}> Заблокировать заявки</label>
             <button class="btn-save" data-save-group="${group._id}">Сохранить</button>
             <button class="btn-save" data-invite-group="${group._id}">Сгенерировать приглашение</button>
-            <input data-group-invite="${group._id}" readonly placeholder="Сообщение появится здесь">
+            <div class="invite-copy-row">
+                <input data-group-invite="${group._id}" readonly placeholder="Сообщение появится здесь">
+                <button class="copy-invite" type="button" data-copy-group="${group._id}" disabled title="Скопировать приглашение" aria-label="Скопировать приглашение">📋</button>
+            </div>
             <button class="btn-save" data-check-group="${group._id}">Проверить бота</button>
             <button class="btn-save" data-delete-group="${group._id}" style="background-color: var(--danger-color);">Удалить</button>
             </div>
@@ -91,18 +108,8 @@ export async function createBackup() {
         const data = await response.json().catch(() => ({}));
         return showAlert(data.error || 'Бэкап не создан');
     }
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
     const result = document.getElementById('backupResult');
-    if (result.dataset.url) URL.revokeObjectURL(result.dataset.url);
-    const filename = `birthday-users-${new Date().toISOString().slice(0, 10)}.json`;
-    result.dataset.url = url;
-    result.innerHTML = `<div class="file-card"><span class="file-icon">🗄️</span><span class="file-meta"><b>${filename}</b><small>${Math.ceil(blob.size / 1024)} КБ · JSON</small></span><button class="file-download" type="button">⬇️</button></div>`;
-    result.querySelector('.file-download').addEventListener('click', () => {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        link.click();
-    });
-    showAlert('Файл готов к скачиванию');
+    const data = await response.json();
+    result.innerHTML = `<div class="file-card"><span class="file-icon">🗄️</span><span class="file-meta"><b>birthday-users.json</b><small>Файл готов</small></span><button class="file-download" type="button">⬇️</button></div>`;
+    result.querySelector('.file-download').addEventListener('click', () => downloadFile(new URL(data.url, API_URL).href, 'birthday-users.json'));
 }

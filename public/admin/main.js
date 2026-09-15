@@ -1,4 +1,4 @@
-import { loadManagedGroups, saveManagedGroup, loadServiceSettings, saveServiceSettings, deleteManagedGroup, checkManagedGroup, generateGroupInvite, createBackup } from './groups.js';
+import { loadManagedGroups, saveManagedGroup, loadServiceSettings, saveServiceSettings, deleteManagedGroup, checkManagedGroup, generateGroupInvite, copyGroupInvite, createBackup } from './groups.js';
 import { showAlert } from '../shared/telegram.js';
 import { state } from './state.js';
 import { loadUsers, filterUsers, filterUsersByGroup, handleGroupSelect, handleRoleChange, saveUserData, deleteUser } from './users.js';
@@ -31,6 +31,8 @@ document.getElementById('managedGroups').addEventListener('click', event => {
     if (checkButton) checkManagedGroup(checkButton.dataset.checkGroup);
     const inviteButton = event.target.closest('[data-invite-group]');
     if (inviteButton) generateGroupInvite(inviteButton.dataset.inviteGroup);
+    const copyButton = event.target.closest('[data-copy-group]');
+    if (copyButton) copyGroupInvite(copyButton.dataset.copyGroup);
 });
 
 document.getElementById('userList').addEventListener('change', event => {
