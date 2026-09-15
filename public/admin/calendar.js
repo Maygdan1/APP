@@ -11,7 +11,7 @@ export function renderCalendar() {
     const currentMonth = today.getMonth();
     const birthdayMap = {};
 
-    const selectedGroups = state.selectedCalendarGroups;
+    const selectedGroups = state.selectedCalendarGroups.filter(Boolean);
     const ownMode = selectedGroups.includes('__mine__');
     const selectedIds = selectedGroups.filter(groupId => groupId !== '__mine__');
     state.users.filter(user => {
@@ -53,7 +53,7 @@ export function renderCalendar() {
         if (summary.length) {
             const summaryElement = document.createElement('div');
             summaryElement.className = 'month-bday-summary';
-            summaryElement.innerHTML = summary.map(person => `📅 <b>${person.day} ${MONTHS_GENITIVE[monthIndex]}</b> — ${escapeHtml(person.name)} ${person.age || ''} ${escapeHtml(person.username ? `(@${person.username})` : '')} <span class="group-tag-inline">${escapeHtml(person.groups)}</span>`).join('');
+            summaryElement.innerHTML = summary.map(person => `<div class="bday-summary-row">📅 <b>${person.day} ${MONTHS_GENITIVE[monthIndex]}</b> — ${escapeHtml(person.name)} ${person.age || ''} ${escapeHtml(person.username ? `(@${person.username})` : '')} <span class="group-tag-inline">${escapeHtml(person.groups)}</span></div>`).join('');
             card.appendChild(summaryElement);
         }
         container.appendChild(card);

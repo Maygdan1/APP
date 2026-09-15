@@ -14,7 +14,7 @@ function switchTab(tabId) {
 document.querySelectorAll('.tab-btn').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
 document.getElementById('calendarPeriod').addEventListener('change', renderCalendar);
 document.getElementById('calendarGroups').addEventListener('change', event => {
-    state.selectedCalendarGroups = [...event.target.selectedOptions].map(option => option.value);
+    state.selectedCalendarGroups = [event.target.value].filter(Boolean);
     renderCalendar();
 });
 document.getElementById('searchInput').addEventListener('input', event => filterUsers(event.target.value));
@@ -56,7 +56,7 @@ loadUsers().then(loaded => {
         const ownOption = state.role === 'admin' && state.ownGroups.length
             ? '<option value="__mine__">Мои группы</option>'
             : '';
-        calendarGroups.innerHTML = '<option value="">Все доступные группы</option>' + ownOption + availableGroups.map(group => `<option value="${group._id}">${group.name}</option>`).join('');
+            calendarGroups.innerHTML = '<option value="">Все доступные группы</option>' + ownOption + availableGroups.map(group => `<option value="${group._id}">${group.name}</option>`).join('');
         const profileButton = document.querySelector('[data-tab="profileTab"]');
         const usersButton = document.querySelector('[data-tab="usersTab"]');
         const groupsButton = document.querySelector('[data-tab="groupsTab"]');

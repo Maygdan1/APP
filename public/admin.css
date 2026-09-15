@@ -55,6 +55,11 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
 }
+    .tab-btn[title] {
+        font-size: 22px;
+        line-height: 1;
+        min-height: 44px;
+    }
 
 .tab-btn.active {
     background-color: var(--button-color);
@@ -233,6 +238,10 @@ select[multiple] option:checked {
     background: var(--bg-color);
     color: var(--text-color);
 }
+    .select-wrapper-no-arrow select {
+        appearance: none;
+        -webkit-appearance: none;
+    }
 
 select[multiple]::-webkit-scrollbar {
     width: 10px;
@@ -415,6 +424,14 @@ select[multiple]::-webkit-scrollbar-thumb {
     flex-direction: column;
     gap: 8px;
 }
+    .bday-summary-row {
+        font-size: 13px;
+        color: var(--text-color);
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px 12px;
+        border-radius: 8px;
+        line-height: 1.45;
+    }
 
 .bday-summary-row {
     font-size: 13px;

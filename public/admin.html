@@ -14,12 +14,12 @@
     </header>
 
     <nav class="admin-tabs">
-        <button class="tab-btn active" data-tab="usersTab">👥 Список</button>
-        <button class="tab-btn" data-tab="profileTab">👤 Профиль</button>
-        <button class="tab-btn" data-tab="calendarTab">📅 Календарь</button>
-        <button class="tab-btn" data-tab="groupsTab">➕ Группы</button>
-        <button class="tab-btn" data-tab="actionsTab">⚙️ Действия</button>
-        <button class="tab-btn" data-tab="exportTab">📥 Выгрузка</button>
+        <button class="tab-btn active" data-tab="usersTab" title="Список" aria-label="Список">👥</button>
+        <button class="tab-btn" data-tab="profileTab" title="Профиль" aria-label="Профиль">👤</button>
+        <button class="tab-btn" data-tab="calendarTab" title="Календарь" aria-label="Календарь">📅</button>
+        <button class="tab-btn" data-tab="groupsTab" title="Группы" aria-label="Группы">➕</button>
+        <button class="tab-btn" data-tab="actionsTab" title="Действия" aria-label="Действия">⚙️</button>
+        <button class="tab-btn" data-tab="exportTab" title="Выгрузка" aria-label="Выгрузка">📥</button>
     </nav>
 
     <main class="admin-container">
@@ -53,9 +53,9 @@
                         <option value="12" selected>Весь год</option>
                     </select>
                 </div>
-                <label for="calendarGroups" class="field-label">Группы</label>
+                <label for="calendarGroups" class="field-label">Отображать</label>
                 <div class="select-wrapper select-wrapper-no-arrow">
-                    <select id="calendarGroups" multiple size="3"></select>
+                    <select id="calendarGroups"></select>
                 </div>
             </div>
 
