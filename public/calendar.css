@@ -1,0 +1,103 @@
+.student-tabs {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto 16px;
+    display: flex;
+    gap: 8px;
+    background: var(--secondary-bg);
+    padding: 6px;
+    border-radius: 14px;
+}
+
+.student-tabs .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--hint-color);
+    padding: 12px 6px;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 10px;
+}
+
+.student-tabs .tab-btn.active {
+    background: var(--button-color);
+    color: #fff;
+}
+
+.student-tabs + .tab-content {
+    width: 100%;
+    max-width: 520px;
+}
+
+.student-tabs ~ .tab-content {
+    display: none;
+    width: 100%;
+    max-width: 520px;
+}
+
+.student-tabs ~ .active-content {
+    display: block;
+}
+
+.calendar-controls-card,
+.month-card {
+    width: 100%;
+    background: var(--secondary-bg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 16px;
+}
+
+.calendar-container {
+    width: 100%;
+}
+
+.field-label {
+    display: block;
+    color: var(--hint-color);
+    font-size: 11px;
+    font-weight: 700;
+    margin: 8px 0;
+    text-transform: uppercase;
+}
+
+.calendar-controls-card select {
+    width: 100%;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px;
+}
+
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+    gap: 8px;
+}
+
+.day-cell {
+    background: var(--bg-color);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    min-height: 54px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.day-cell.has-bday {
+    background: rgba(217, 119, 6, 0.12);
+    border-color: rgba(217, 119, 6, 0.6);
+}
+
+.day-number { color: var(--hint-color); font-size: 11px; font-weight: 700; }
+.bday-badge-count { color: #fcd34d; font-size: 11px; font-weight: 700; }
+.month-title { color: var(--button-color); font-size: 16px; margin-bottom: 14px; }
+.month-bday-summary { display: grid; gap: 8px; margin-top: 16px; padding-top: 12px; border-top: 1px dashed rgba(255, 255, 255, 0.1); }
+.group-tag-inline { color: var(--button-color); font-weight: 600; }

@@ -1,0 +1,20 @@
+{
+  "name": "birthday-bot",
+  "version": "1.0.0",
+  "description": "Birthday Bot for 1st Year Students",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "bootstrap": "node scripts/bootstrap-admin.js",
+    "export:backup": "node scripts/export-backup.js",
+    "import:backup": "node scripts/import-backup.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "grammy": "^1.21.1",
+    "mongoose": "^8.24.4"
+  }
+}

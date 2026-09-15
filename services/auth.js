@@ -1,0 +1,69 @@
+import crypto from 'crypto';
+import { User } from '../models/User.js';
+
+export function createAuthService({ token, sessionSecret }) {
+    const sessions = new Map();
+
+    async function getUserAuthContext(tgId) {
+        const user = await User.findOne({ tg_id: Number(tgId) }).populate('group_ids').lean();
+        if (!user) return { isAdmin: false, isMentor: false, groups: [], user };
+        const groups = user.group_ids || [];
+        return {
+            isAdmin: user.role === 'admin',
+            isMentor: user.role === 'mentor',
+            groups,
+            user
+        };
+    }
+
+    function validateTelegramInitData(initData) {
+        const params = new URLSearchParams(initData || '');
+        const receivedHash = params.get('hash');
+        const authDate = Number(params.get('auth_date'));
+        if (!receivedHash || !authDate || Date.now() / 1000 - authDate > 86400) return null;
+
+        params.delete('hash');
+        const dataCheckString = [...params.entries()]
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([key, value]) => `${key}=${value}`)
+            .join('\n');
+        const secretKey = crypto.createHmac('sha256', 'WebAppData').update(token).digest();
+        const expectedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+        if (receivedHash.length !== expectedHash.length || !crypto.timingSafeEqual(Buffer.from(receivedHash, 'hex'), Buffer.from(expectedHash, 'hex'))) return null;
+
+        try {
+            const user = JSON.parse(params.get('user') || '{}');
+            return Number.isSafeInteger(user.id) ? user : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function createSession(userId) {
+        const expiresAt = Date.now() + 5 * 60 * 1000;
+        const payload = `${userId}.${expiresAt}`;
+        const signature = crypto.createHmac('sha256', sessionSecret).update(payload).digest('hex');
+        const tokenValue = `${payload}.${signature}`;
+        sessions.set(tokenValue, { userId, expiresAt });
+        return { token: tokenValue, expiresAt };
+    }
+
+    async function requireSession(req, res, next) {
+        const tokenValue = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+        const session = sessions.get(tokenValue);
+        if (!session || session.expiresAt < Date.now()) {
+            sessions.delete(tokenValue);
+            return res.status(401).json({ error: 'Сессия истекла' });
+        }
+        req.auth = await getUserAuthContext(session.userId);
+        req.auth.tgId = session.userId;
+        next();
+    }
+
+    function requireAdmin(req, res, next) {
+        if (!req.auth?.isAdmin) return res.status(403).json({ error: 'Доступ только для администратора' });
+        next();
+    }
+
+    return { createSession, getUserAuthContext, requireSession, requireAdmin, validateTelegramInitData };
+}

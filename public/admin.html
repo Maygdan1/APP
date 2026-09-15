@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Панель управления</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header class="admin-header">
+        <h2>👑 Панель управления</h2>
+        <p class="subtitle">Управление, аналитика и выгрузка данных</p>
+    </header>
+
+    <nav class="admin-tabs">
+        <button class="tab-btn active" data-tab="usersTab">👥 Список</button>
+        <button class="tab-btn" data-tab="profileTab">👤 Профиль</button>
+        <button class="tab-btn" data-tab="calendarTab">📅 Календарь</button>
+        <button class="tab-btn" data-tab="exportTab">📥 Выгрузка</button>
+        <button class="tab-btn" data-tab="groupsTab">➕ Группы</button>
+        <button class="tab-btn" data-tab="actionsTab">⚙️ Действия</button>
+    </nav>
+
+    <main class="admin-container">
+        <div id="accessDenied" class="error-banner" style="display: none; padding: 20px; text-align: center; color: var(--danger-color);">
+            ⛔ Доступ запрещен. Вы не являетесь администратором или наставником.
+        </div>
+
+        <div id="loader" class="loader">Загрузка данных...</div>
+
+        <!-- ВКЛАДКА 1: Список -->
+        <section id="usersTab" class="tab-content active-content">
+            <div id="controls" class="controls-bar" style="display: none;">
+                <input type="text" id="searchInput" placeholder="🔍 Поиск по имени или @username...">
+            </div>
+            <div id="userList" class="user-list"></div>
+        </section>
+
+        <section id="profileTab" class="tab-content">
+            <div class="export-card" id="profileCard"></div>
+        </section>
+
+        <!-- ВКЛАДКА 2: Календарь -->
+        <section id="calendarTab" class="tab-content">
+            <div class="calendar-controls-card">
+                <label for="calendarPeriod" class="field-label">Период отображения</label>
+                <div class="select-wrapper">
+                    <select id="calendarPeriod">
+                        <option value="1">текущий месяц</option>
+                        <option value="6-1">1-е полугодие</option>
+                        <option value="6-2">2-е полугодие</option>
+                        <option value="12" selected>Весь год</option>
+                    </select>
+                </div>
+                <label for="calendarGroups" class="field-label">Группы</label>
+                <div class="select-wrapper">
+                    <select id="calendarGroups" multiple size="3"></select>
+                </div>
+            </div>
+
+            <div id="calendarContainer" class="calendar-container"></div>
+        </section>
+
+        <!-- ВКЛАДКА 3: Выгрузка -->
+        <section id="exportTab" class="tab-content">
+            <div class="export-card">
+                <h3>📥 Выгрузка списка в CSV</h3>
+                <p>Выберите учебную группу для скачивания файла:</p>
+                
+                <div class="field-group" style="margin-top: 14px;">
+                    <label>Учебная группа:</label>
+                    <div class="select-wrapper">
+                        <select id="exportGroupSelect">
+                            <!-- Заполняется динамически frontend-модулем панели -->
+                        </select>
+                    </div>
+                </div>
+
+                <button id="exportButton" class="btn-save" style="background-color: var(--success-color); margin-top: 16px;">
+                    💾 Скачать таблицу (.csv)
+                </button>
+            </div>
+        </section>
+
+        <section id="groupsTab" class="tab-content">
+            <div class="export-card">
+                <h3>Добавить группу</h3>
+                <input id="newGroupName" placeholder="Название группы">
+                <input id="newGroupChatId" type="number" placeholder="Chat ID">
+                <input id="newGroupTopicId" type="number" placeholder="Topic ID (необязательно)">
+                <button id="createGroupButton" class="btn-save">Добавить</button>
+            </div>
+        </section>
+
+        <section id="actionsTab" class="tab-content">
+            <div class="export-card">
+                <h3>Действия и защита сервиса</h3>
+                <div class="settings-list">
+                    <label class="settings-option"><input id="acceptGroupRequests" type="checkbox"> <span>Принимать запросы на подключение групп</span></label>
+                    <label class="settings-option"><input id="acceptNewUsers" type="checkbox"> <span>Разрешить регистрацию новых пользователей</span></label>
+                </div>
+                <label class="settings-number" for="maxPendingGroupRequests">Максимум ожидающих заявок
+                    <input id="maxPendingGroupRequests" type="number" min="1" max="1000" value="50">
+                </label>
+                <button id="saveServiceSettings" class="btn-save">Сохранить настройки</button>
+                <h3 style="margin-top: 22px;">Секрет регистрации</h3>
+                <h3 style="margin-top: 22px;">Резервная копия</h3>
+                <button id="createBackup" class="btn-save">Создать бэкап пользователей</button>
+                <h3 style="margin-top: 22px;">Запросы и группы</h3>
+                <div id="managedGroups"></div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="admin/main.js"></script>
+</body>
+</html>

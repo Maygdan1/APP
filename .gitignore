@@ -1,0 +1,19 @@
+node_modules/
+
+# Local secrets and environment files
+.env
+*.env
+!.env.example
+atlas-credentials.env
+
+# Personal exports and database dumps
+backup_users.json
+backup_users_before_migration.json
+backup_users*.json
+*.dump
+*.bson
+
+# Local-only scripts and temporary files
+scripts/local/
+*.local.js
+*.tmp
