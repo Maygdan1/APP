@@ -67,14 +67,13 @@ export async function loadManagedGroups() {
             <input data-group-topic="${group._id}" type="number" value="${group.topicId ?? ''}" placeholder="Topic ID">
             <label><input data-group-active="${group._id}" type="checkbox" ${group.active ? 'checked' : ''}> Использовать для рассылки</label>
             <label><input data-group-blocked="${group._id}" type="checkbox" ${group.blocked ? 'checked' : ''}> Заблокировать заявки</label>
-            <button class="btn-save" data-save-group="${group._id}">Сохранить</button>
+            <button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-save-group="${group._id}">☁</button>
             <button class="btn-save" data-invite-group="${group._id}">Сгенерировать приглашение</button>
             <div class="invite-copy-row">
                 <input data-group-invite="${group._id}" readonly placeholder="Сообщение появится здесь">
                 <button class="copy-invite" type="button" data-copy-group="${group._id}" disabled title="Скопировать приглашение" aria-label="Скопировать приглашение">📋</button>
             </div>
-            <button class="btn-save" data-check-group="${group._id}">Проверить бота</button>
-            <button class="btn-save" data-delete-group="${group._id}" style="background-color: var(--danger-color);">Удалить</button>
+            <button class="icon-action icon-trash" title="Удалить группу" aria-label="Удалить группу" data-delete-group="${group._id}">🗑️</button>
             </div>
         </details>`).join('');
 }

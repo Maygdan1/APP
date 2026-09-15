@@ -94,7 +94,7 @@ export function renderUsers(users) {
                 <option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Администратор</option>
             </select></div></div>
             <div class="field-group"><label>${isAdmin ? 'Привязанные группы:' : 'Ваши группы:'}</label><div class="${isAdmin ? 'groups-grid' : 'mentor-groups-container'}">${groupsHtml}</div></div>
-            ${isAdmin ? `<button class="btn-save" data-action="save-user" data-user-id="${user._id}">Сохранить</button>${!(isAdminUser && (state.adminCount <= 1 || String(user._id) === String(state.currentUser?._id))) ? `<button class="btn-save btn-danger" data-action="delete-user" data-user-id="${user._id}">Удалить</button>` : ''}` : '<div class="muted">🔒 Вашу роль и группы регулирует Главный Администратор</div>'}`;
+            ${isAdmin ? `<div class="card-actions"><button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-action="save-user" data-user-id="${user._id}">☁</button>${!(isAdminUser && (state.adminCount <= 1 || String(user._id) === String(state.currentUser?._id))) ? `<button class="icon-action icon-trash" title="Удалить карточку" aria-label="Удалить карточку" data-action="delete-user" data-user-id="${user._id}">🗑️</button>` : ''}</div>` : '<div class="muted">🔒 Вашу роль и группы регулирует Главный Администратор</div>'}`;
         container.appendChild(card);
     });
 }
@@ -127,7 +127,6 @@ export function renderMentorGroups(groupId = '') {
 }
 
 export async function deleteUser(userId) {
-    if (!confirm('Удалить пользователя из базы данных? Это действие нельзя отменить.')) return;
     const response = await apiFetch(`${API_URL}/api/admin/users/${userId}`, { method: 'DELETE' });
     const data = await response.json();
     showAlert(response.ok ? 'Пользователь удален' : data.error || 'Не удалось удалить пользователя');

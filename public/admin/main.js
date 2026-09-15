@@ -5,6 +5,13 @@ import { loadUsers, filterUsers, filterUsersByGroup, handleGroupSelect, handleRo
 import { renderCalendar } from './calendar.js';
 import { setupExportSelect, exportGroupData } from './export.js';
 
+let pendingConfirmation = null;
+
+export function requestDeleteConfirmation(action) {
+    pendingConfirmation = action;
+    document.getElementById('confirmModal').hidden = false;
+}
+
 function switchTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(button => button.classList.toggle('active', button.dataset.tab === tabId));
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.toggle('active-content', tab.id === tabId));
@@ -26,7 +33,7 @@ document.getElementById('managedGroups').addEventListener('click', event => {
     const button = event.target.closest('[data-save-group]');
     if (button) saveManagedGroup(button.dataset.saveGroup);
     const deleteButton = event.target.closest('[data-delete-group]');
-    if (deleteButton) deleteManagedGroup(deleteButton.dataset.deleteGroup);
+    if (deleteButton) requestDeleteConfirmation(() => deleteManagedGroup(deleteButton.dataset.deleteGroup));
     const checkButton = event.target.closest('[data-check-group]');
     if (checkButton) checkManagedGroup(checkButton.dataset.checkGroup);
     const inviteButton = event.target.closest('[data-invite-group]');
@@ -45,7 +52,19 @@ document.getElementById('userList').addEventListener('click', event => {
     const button = event.target.closest('[data-action="save-user"]');
     if (button) saveUserData(button.dataset.userId);
     const deleteButton = event.target.closest('[data-action="delete-user"]');
-    if (deleteButton) deleteUser(deleteButton.dataset.userId);
+    if (deleteButton) requestDeleteConfirmation(() => deleteUser(deleteButton.dataset.userId));
+});
+
+document.getElementById('confirmYes').addEventListener('click', async () => {
+    const action = pendingConfirmation;
+    pendingConfirmation = null;
+    document.getElementById('confirmModal').hidden = true;
+    if (action) await action();
+});
+
+document.getElementById('confirmNo').addEventListener('click', () => {
+    pendingConfirmation = null;
+    document.getElementById('confirmModal').hidden = true;
 });
 
 loadUsers().then(loaded => {

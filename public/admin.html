@@ -21,6 +21,15 @@
     </nav>
 
     <main class="admin-container">
+        <div id="confirmModal" class="confirm-modal" hidden>
+            <div class="confirm-card">
+                <span>Вы уверены?</span>
+                <div class="confirm-actions">
+                    <button id="confirmYes" class="icon-action icon-danger" type="button">Да</button>
+                    <button id="confirmNo" class="icon-action" type="button">Нет</button>
+                </div>
+            </div>
+        </div>
         <div id="accessDenied" class="error-banner" style="display: none; padding: 20px; text-align: center; color: var(--danger-color);">
             ⛔ Доступ запрещен. Вы не являетесь администратором или наставником.
         </div>

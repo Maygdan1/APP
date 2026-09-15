@@ -158,37 +158,45 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     });
 
     router.get('/admin/backup/download', requireSession, requireAdmin, async (req, res) => {
-        const users = await User.find().lean();
-        const content = `${JSON.stringify(users, null, 2)}\n`;
-        res.json({ url: createDownload(content, 'application/json; charset=utf-8', `birthday-users-${new Date().toISOString().slice(0, 10)}.json`) });
+        try {
+            const users = await User.find().lean();
+            const content = `${JSON.stringify(users, null, 2)}\n`;
+            res.json({ url: createDownload(content, 'application/json; charset=utf-8', `birthday-users-${new Date().toISOString().slice(0, 10)}.json`) });
+        } catch (error) {
+            res.status(500).json({ error: `Не удалось сформировать JSON: ${error.message}` });
+        }
     });
 
     router.post('/admin/export/csv', requireSession, async (req, res) => {
-        const selectedGroup = req.body?.groupId;
-        if (!req.auth.isAdmin && !req.auth.isMentor) return res.status(403).json({ error: 'Доступ только для админа или наставника' });
-        const allowedGroupIds = req.auth.isAdmin ? null : req.auth.groups.map(group => String(group._id));
-        if (selectedGroup && selectedGroup !== 'all' && allowedGroupIds && !allowedGroupIds.includes(String(selectedGroup))) {
-            return res.status(403).json({ error: 'Группа недоступна' });
+        try {
+            const selectedGroup = req.body?.groupId;
+            if (!req.auth.isAdmin && !req.auth.isMentor) return res.status(403).json({ error: 'Доступ только для админа или наставника' });
+            const allowedGroupIds = req.auth.isAdmin ? null : req.auth.groups.map(group => String(group._id));
+            if (selectedGroup && selectedGroup !== 'all' && allowedGroupIds && !allowedGroupIds.includes(String(selectedGroup))) {
+                return res.status(403).json({ error: 'Группа недоступна' });
+            }
+            const query = selectedGroup && selectedGroup !== 'all'
+                ? { group_ids: selectedGroup }
+                : allowedGroupIds ? { group_ids: { $in: allowedGroupIds } } : {};
+            const users = await User.find(query).populate('group_ids').lean();
+            const groups = await Group.find({ active: true }).lean();
+            const monthNames = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+            const formatDate = value => {
+                if (!value) return 'Не указан';
+                const [year, month, day] = value.split('-');
+                return `${Number(day)} ${monthNames[Number(month) - 1] || month} ${year}`;
+            };
+            const rows = [['Имя', 'Telegram Username', 'Роль', 'День рождения', 'Группы']];
+            users.forEach(user => {
+                const names = (user.group_ids || []).map(id => groups.find(group => String(group._id) === String(id._id))?.name).filter(Boolean).join(', ');
+                rows.push([user.username || 'Без имени', user.tg_username ? `@${user.tg_username.replace('@', '')}` : '', user.role === 'mentor' ? 'Наставник' : user.role === 'admin' ? 'Администратор' : 'Студент', formatDate(user.birthday), names]);
+            });
+            const csv = `\uFEFF${rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\n')}`;
+            const safeName = selectedGroup && selectedGroup !== 'all' ? 'группа' : 'все-группы';
+            res.json({ url: createDownload(csv, 'text/csv; charset=utf-8', `Дни_Рождения_${safeName}.csv`) });
+        } catch (error) {
+            res.status(500).json({ error: `Не удалось сформировать CSV: ${error.message}` });
         }
-        const query = selectedGroup && selectedGroup !== 'all'
-            ? { group_ids: selectedGroup }
-            : allowedGroupIds ? { group_ids: { $in: allowedGroupIds } } : {};
-        const users = await User.find(query).populate('group_ids').lean();
-        const groups = await Group.find({ active: true }).lean();
-        const monthNames = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-        const formatDate = value => {
-            if (!value) return 'Не указан';
-            const [year, month, day] = value.split('-');
-            return `${Number(day)} ${monthNames[Number(month) - 1] || month} ${year}`;
-        };
-        const rows = [['Имя', 'Telegram Username', 'Роль', 'День рождения', 'Группы']];
-        users.forEach(user => {
-            const names = (user.group_ids || []).map(id => groups.find(group => String(group._id) === String(id._id))?.name).filter(Boolean).join(', ');
-            rows.push([user.username || 'Без имени', user.tg_username ? `@${user.tg_username.replace('@', '')}` : '', user.role === 'mentor' ? 'Наставник' : user.role === 'admin' ? 'Администратор' : 'Студент', formatDate(user.birthday), names]);
-        });
-        const csv = `\uFEFF${rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\n')}`;
-        const safeName = selectedGroup && selectedGroup !== 'all' ? 'группа' : 'все-группы';
-        res.json({ url: createDownload(csv, 'text/csv; charset=utf-8', `Дни_Рождения_${safeName}.csv`) });
     });
 
     router.patch('/admin/groups/:groupId', requireSession, requireAdmin, async (req, res) => {
