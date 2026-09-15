@@ -100,30 +100,26 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
         res.json({ success: true });
     });
 
-    router.post('/admin/groups', requireSession, requireAdmin, async (req, res) => {
-        const { name, chatId, topicId } = req.body || {};
-        if (!name || !Number.isSafeInteger(Number(chatId))) return res.status(400).json({ error: 'Название и числовой Chat ID обязательны' });
-        try {
-            const group = await Group.create({ name, chatId: Number(chatId), topicId: topicId === '' || topicId == null ? null : Number(topicId) });
-            res.status(201).json({ success: true, group });
-        } catch (error) {
-            res.status(409).json({ error: error.code === 11000 ? 'Такая группа или чат уже существует' : error.message });
-        }
-    });
-
     router.get('/admin/groups', requireSession, requireAdmin, async (req, res) => {
         res.json({ groups: await Group.find().sort({ name: 1 }).lean() });
     });
 
     router.get('/admin/settings', requireSession, requireAdmin, async (req, res) => {
-        const settings = await Settings.findOneAndUpdate(
-            { key: 'service' }, {}, { upsert: true, new: true, setDefaultsOnInsert: true }
-        ).lean();
+        let settings = await Settings.findOne({ key: 'service' });
+        if (!settings) settings = await Settings.create({ key: 'service' });
+        if (!Number.isInteger(settings.maxPendingGroupRequests) || settings.maxPendingGroupRequests < 1 || settings.maxPendingGroupRequests > 10) {
+            settings.maxPendingGroupRequests = Math.min(Math.max(Number(settings.maxPendingGroupRequests) || 5, 1), 10);
+            await settings.save();
+        }
+        settings = settings.toObject();
         res.json({ settings });
     });
 
     router.patch('/admin/settings', requireSession, requireAdmin, async (req, res) => {
         const { acceptGroupRequests, acceptNewUsers, maxPendingGroupRequests } = req.body || {};
+        if (maxPendingGroupRequests !== undefined && (!Number.isInteger(Number(maxPendingGroupRequests)) || Number(maxPendingGroupRequests) < 1 || Number(maxPendingGroupRequests) > 10)) {
+            return res.status(400).json({ error: 'Лимит заявок должен быть числом от 1 до 10' });
+        }
         const settings = await Settings.findOneAndUpdate(
             { key: 'service' },
             {

@@ -17,7 +17,6 @@
         <button class="tab-btn active" data-tab="usersTab" title="Список" aria-label="Список">👥</button>
         <button class="tab-btn" data-tab="profileTab" title="Профиль" aria-label="Профиль">👤</button>
         <button class="tab-btn" data-tab="calendarTab" title="Календарь" aria-label="Календарь">📅</button>
-        <button class="tab-btn" data-tab="groupsTab" title="Группы" aria-label="Группы">➕</button>
         <button class="tab-btn" data-tab="actionsTab" title="Действия" aria-label="Действия">⚙️</button>
         <button class="tab-btn" data-tab="exportTab" title="Выгрузка" aria-label="Выгрузка">📥</button>
     </nav>
@@ -87,18 +86,6 @@
             </div>
         </section>
 
-        <section id="groupsTab" class="tab-content">
-            <div class="export-card">
-                <h3>Добавить группу</h3>
-                <div class="group-create-form">
-                    <input id="newGroupName" placeholder="Название группы">
-                    <input id="newGroupChatId" type="number" placeholder="Chat ID">
-                    <input id="newGroupTopicId" type="number" placeholder="Topic ID (необязательно)">
-                </div>
-                <button id="createGroupButton" class="btn-save">Добавить</button>
-            </div>
-        </section>
-
         <section id="actionsTab" class="tab-content">
             <div class="export-card">
                 <h3>Действия и защита сервиса</h3>
@@ -107,7 +94,7 @@
                     <label class="settings-option"><input id="acceptNewUsers" type="checkbox"> <span>Разрешить регистрацию новых пользователей</span></label>
                 </div>
                 <label class="settings-number" for="maxPendingGroupRequests">Максимум ожидающих заявок
-                    <input id="maxPendingGroupRequests" type="number" min="1" max="1000" value="50">
+                    <input id="maxPendingGroupRequests" class="limit-input" type="number" min="1" max="10" step="1" value="5" inputmode="numeric">
                 </label>
                 <button id="saveServiceSettings" class="btn-save">Сохранить настройки</button>
                 <h3 style="margin-top: 22px;">Резервная копия</h3>

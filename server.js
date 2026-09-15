@@ -79,7 +79,7 @@ async function consumeInvite(ctx, tokenValue) {
     if (!chat || !['group', 'supergroup'].includes(chat.type)) return;
     const topicId = ctx.message?.message_thread_id || null;
     const settings = await Settings.findOne({ key: 'service' }).lean();
-    const pendingLimit = settings?.maxPendingGroupRequests ?? 50;
+    const pendingLimit = Math.min(settings?.maxPendingGroupRequests ?? 5, 10);
     if (settings && (!settings.acceptGroupRequests || pendingLimit <= await Group.countDocuments({ active: false, blocked: false, registrationUsedAt: { $ne: null } }))) return;
         const invite = await GroupInvite.findOne({ tokenHash: hashRegistrationKey(tokenValue), consumedAt: null });
     if (!invite) return;
@@ -118,17 +118,12 @@ bot.on('my_chat_member', async ctx => {
     }
 });
 
-// Сохраняем topic_id молча, если Telegram прислал сообщение из форума.
-// Ответов в групповых чатах бот не отправляет.
+// Обрабатываем только одноразовые приглашения. Обычные сообщения и новые топики игнорируются.
 bot.on('message', async ctx => {
     if (ctx.chat?.type !== 'group' && ctx.chat?.type !== 'supergroup') return;
     const invite = isInviteMessage(ctx);
     if (invite) {
         await consumeInvite(ctx, invite.token);
-        return;
-    }
-    if (ctx.message?.message_thread_id) {
-        await registerTelegramGroup(ctx, ctx.message.message_thread_id);
     }
 });
 

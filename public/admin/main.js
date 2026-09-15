@@ -1,4 +1,4 @@
-import { createGroup, loadManagedGroups, saveManagedGroup, loadServiceSettings, saveServiceSettings, deleteManagedGroup, checkManagedGroup, generateGroupInvite, createBackup } from './groups.js';
+import { loadManagedGroups, saveManagedGroup, loadServiceSettings, saveServiceSettings, deleteManagedGroup, checkManagedGroup, generateGroupInvite, createBackup } from './groups.js';
 import { showAlert } from '../shared/telegram.js';
 import { state } from './state.js';
 import { loadUsers, filterUsers, filterUsersByGroup, handleGroupSelect, handleRoleChange, saveUserData, deleteUser } from './users.js';
@@ -20,7 +20,6 @@ document.getElementById('calendarGroups').addEventListener('change', event => {
 document.getElementById('searchInput').addEventListener('input', event => filterUsers(event.target.value));
 document.getElementById('usersGroupFilter').addEventListener('change', event => filterUsersByGroup(event.target.value));
 document.getElementById('exportButton').addEventListener('click', exportGroupData);
-document.getElementById('createGroupButton').addEventListener('click', createGroup);
 document.getElementById('saveServiceSettings').addEventListener('click', saveServiceSettings);
 document.getElementById('createBackup').addEventListener('click', createBackup);
 document.getElementById('managedGroups').addEventListener('click', event => {
@@ -62,10 +61,8 @@ loadUsers().then(loaded => {
             calendarGroups.innerHTML = '<option value="">Все доступные группы</option>' + ownOption + availableGroups.map(group => `<option value="${group._id}">${group.name}</option>`).join('');
         const profileButton = document.querySelector('[data-tab="profileTab"]');
         const usersButton = document.querySelector('[data-tab="usersTab"]');
-        const groupsButton = document.querySelector('[data-tab="groupsTab"]');
         if (state.role === 'mentor') {
             usersButton.style.display = 'none';
-            groupsButton.style.display = 'none';
             profileButton.style.display = '';
             switchTab('profileTab');
         } else {

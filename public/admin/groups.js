@@ -78,20 +78,6 @@ export async function saveManagedGroup(groupId) {
     if (response.ok) loadManagedGroups();
 }
 
-export async function createGroup() {
-    const response = await apiFetch(`${API_URL}/api/admin/groups`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            name: document.getElementById('newGroupName').value.trim(),
-            chatId: document.getElementById('newGroupChatId').value,
-            topicId: document.getElementById('newGroupTopicId').value
-        })
-    });
-    const data = await response.json();
-    showAlert(response.ok ? 'Группа добавлена' : data.error || 'Не удалось добавить группу');
-    if (response.ok) loadManagedGroups();
-}
-
 export async function checkManagedGroup(groupId) {
     const response = await apiFetch(`${API_URL}/api/admin/groups/${groupId}/check`, { method: 'POST' });
     const data = await response.json();

@@ -187,8 +187,13 @@ input[type="number"] {
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
-    opacity: 0.7;
-    filter: invert(1);
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
 }
 
 input::placeholder,
@@ -284,6 +289,16 @@ select[multiple]::-webkit-scrollbar-thumb {
 
 .settings-number {
     margin-bottom: 18px;
+}
+
+.limit-input::-webkit-inner-spin-button,
+.limit-input::-webkit-outer-spin-button {
+    display: none;
+}
+
+.limit-input {
+    appearance: textfield;
+    -moz-appearance: textfield;
 }
 
 .group-create-form {
