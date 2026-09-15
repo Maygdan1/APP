@@ -5,6 +5,16 @@ import { renderCalendar } from './admin/calendar.js';
 
 const user = tg.initDataUnsafe?.user;
 const birthdayInput = document.getElementById('birthdayInput');
+const nameInput = document.getElementById('nameInput');
+
+nameInput.addEventListener('input', event => {
+    event.target.value = event.target.value
+        .replace(/[^А-Яа-яЁё]/g, '')
+        .slice(0, 15);
+    if (event.target.value) {
+        event.target.value = event.target.value.charAt(0).toLocaleUpperCase('ru-RU') + event.target.value.slice(1).toLocaleLowerCase('ru-RU');
+    }
+});
 
 document.querySelectorAll('.student-tabs .tab-btn').forEach(button => button.addEventListener('click', async () => {
     document.querySelectorAll('.student-tabs .tab-btn').forEach(item => item.classList.toggle('active', item === button));
@@ -93,12 +103,12 @@ tg.MainButton.textColor = '#FFFFFF';
 tg.MainButton.color = tg.themeParams.button_color || '#2481cc';
 tg.MainButton.show();
 tg.MainButton.onClick(async () => {
-    const username = document.getElementById('nameInput').value.trim();
+    const username = nameInput.value.trim();
     const groupId = document.getElementById('groupSelect').value;
     const dateString = birthdayInput.value;
     const [day, month, year] = dateString.split('.');
 
-    if (!username) return showAlert('Пожалуйста, введите свое имя!');
+    if (!/^[А-ЯЁ][а-яё]{1,14}$/.test(username)) return showAlert('Имя: 2–15 букв русского алфавита, первая буква заглавная');
     if (!/^\d{2}\.\d{2}\.\d{4}$/.test(dateString) || Number(day) > 31 || Number(month) > 12 || Number(year) < 1980 || Number(year) > 2015) {
         return showAlert('Пожалуйста, введите корректную дату рождения!');
     }

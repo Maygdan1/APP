@@ -21,9 +21,10 @@ try {
                 group_indexes: item.group_indexes || [],
                 username: item.username,
                 birthday: item.birthday,
+                group_ids: Array.isArray(item.group_ids) ? item.group_ids : [],
                 lastCongratulatedYear: item.lastCongratulatedYear ?? 0
             }
-        }, { upsert: true, new: true });
+        }, { upsert: true, new: true, runValidators: true });
     }
 
     console.log(`Синхронизировано пользователей: ${users.length}`);

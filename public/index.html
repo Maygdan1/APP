@@ -58,7 +58,7 @@
         <form id="birthdayForm" onsubmit="return false;">
             <div class="form-group">
                 <label for="nameInput">Как тебя зовут?</label>
-                <input type="text" id="nameInput" placeholder="Только имя: например, Кристина">
+                <input type="text" id="nameInput" placeholder="Только имя: например, Кристина" minlength="2" maxlength="15" pattern="[А-ЯЁ][а-яё]{1,14}" autocomplete="given-name">
             </div>
 
             <div class="form-group">

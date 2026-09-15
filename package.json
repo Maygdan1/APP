@@ -8,7 +8,9 @@
     "start": "node server.js",
     "bootstrap": "node scripts/bootstrap-admin.js",
     "export:backup": "node scripts/export-backup.js",
-    "import:backup": "node scripts/import-backup.js"
+    "import:backup": "node scripts/import-backup.js",
+    "normalize:names": "node scripts/normalize-user-names.js",
+    "normalize:names:apply": "node scripts/normalize-user-names.js --apply"
   },
   "dependencies": {
     "cors": "^2.8.5",

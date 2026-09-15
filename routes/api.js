@@ -19,7 +19,9 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
 
     router.post('/save-birthday', requireSession, async (req, res) => {
         const { username, birthday, group_id: groupId } = req.body;
-        if (!username || !birthday || !mongoose.isValidObjectId(groupId)) return res.status(400).json({ error: 'Неполные данные' });
+        if (!/^[А-ЯЁ][а-яё]{1,14}$/.test(username || '') || !birthday || !mongoose.isValidObjectId(groupId)) {
+            return res.status(400).json({ error: 'Имя: 2–15 букв русского алфавита, первая буква заглавная' });
+        }
         try {
             const group = await Group.findOne({ _id: groupId, active: true });
             if (!group) return res.status(400).json({ error: 'Группа не найдена' });

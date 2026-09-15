@@ -8,7 +8,7 @@ const outputPath = path.resolve(process.env.BACKUP_FILE || 'backup_users.json');
 const mongoUri = process.env.MONGO_URI?.trim().replace(/^['"]|['"]$/g, '');
 
 if (!mongoUri || mongoUri.startsWith('replace_with_') || !/^mongodb(?:\+srv)?:\/\//.test(mongoUri)) {
-    throw new Error('MONGO_URI должен начинаться с mongodb:// или mongodb+srv://. Возьмите актуальное значение из Render.');
+    throw new Error('MONGO_URI должен начинаться с mongodb:// или mongodb+srv://.');
 }
 
 try {
