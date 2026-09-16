@@ -197,7 +197,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
         try {
             const users = await User.find().lean();
             const content = `${JSON.stringify(users, null, 2)}\n`;
-            res.json(createDownload(content, 'application/json; charset=utf-8', `birthday-users-${new Date().toISOString().slice(0, 10)}.json`));
+            res.json(createDownload(content, 'application/octet-stream', `birthday-users-${new Date().toISOString().slice(0, 10)}.json`));
         } catch (error) {
             res.status(500).json({ error: `Не удалось сформировать JSON: ${error.message}` });
         }
@@ -227,7 +227,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
                 const names = (user.group_ids || []).map(id => groups.find(group => String(group._id) === String(id._id))?.name).filter(Boolean).join(', ');
                 rows.push([user.username || 'Без имени', user.tg_username ? `@${user.tg_username.replace('@', '')}` : '', user.role === 'mentor' ? 'Наставник' : user.role === 'admin' ? 'Администратор' : 'Студент', formatDate(user.birthday), names]);
             });
-            const csv = `\uFEFF${rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\n')}`;
+            const csv = Buffer.from(`\uFEFF${rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\r\n')}`, 'utf8');
             const safeName = selectedGroup && selectedGroup !== 'all' ? 'группа' : 'все-группы';
             res.json(createDownload(csv, 'text/csv; charset=utf-8', `Дни_Рождения_${safeName}.csv`));
         } catch (error) {

@@ -1,5 +1,5 @@
 import { escapeHtml } from '../shared/utils.js';
-import { API_URL, apiFetch, downloadFile, openFile, showAlert } from '../shared/telegram.js';
+import { API_URL, apiFetch, downloadFile, showAlert } from '../shared/telegram.js';
 
 export async function loadServiceSettings() {
     const response = await apiFetch(`${API_URL}/api/admin/settings`);
@@ -109,7 +109,6 @@ export async function createBackup() {
     }
     const result = document.getElementById('backupResult');
     const data = await response.json();
-    result.innerHTML = `<div class="file-card"><span class="file-icon">🗄️</span><span class="file-meta"><b>birthday-users.json</b><small>Файл готов</small></span><button class="file-open" type="button">Открыть</button><button class="file-download" type="button">⬇️</button></div>`;
-    result.querySelector('.file-open').addEventListener('click', () => openFile(new URL(data.viewUrl, API_URL).href));
+    result.innerHTML = `<div class="file-card"><span class="file-icon">🗄️</span><span class="file-meta"><b>birthday-users.json</b><small>JSON-файл готов</small></span><button class="file-download" type="button">⬇️</button></div>`;
     result.querySelector('.file-download').addEventListener('click', () => downloadFile(new URL(data.downloadUrl, API_URL).href, 'birthday-users.json'));
 }
