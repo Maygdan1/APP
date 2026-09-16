@@ -14,6 +14,29 @@ function getUserMention(user) {
 }
 
 export function createBirthdayService(bot) {
+    const birthdayTimeZone = process.env.BIRTHDAY_TIMEZONE || 'Europe/Moscow';
+    const birthdayHour = Number.isInteger(Number(process.env.BIRTHDAY_HOUR))
+        ? Math.min(Math.max(Number(process.env.BIRTHDAY_HOUR), 0), 23)
+        : 6;
+    let scheduledCheckInProgress = false;
+
+    function getCurrentBirthdayDate() {
+        const parts = new Intl.DateTimeFormat('en-CA', {
+            timeZone: birthdayTimeZone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            hourCycle: 'h23'
+        }).formatToParts(new Date());
+        const values = Object.fromEntries(parts.filter(part => part.type !== 'literal').map(part => [part.type, part.value]));
+        return {
+            year: Number(values.year),
+            currentMD: `${values.month}-${values.day}`,
+            hour: Number(values.hour)
+        };
+    }
+
     async function syncLocalBackup() {
         try {
             const users = await User.find().lean();
@@ -25,9 +48,7 @@ export function createBirthdayService(bot) {
     }
 
     async function checkAndSendBirthdays() {
-        const today = new Date();
-        const currentYear = today.getFullYear();
-        const currentMD = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const { year: currentYear, currentMD } = getCurrentBirthdayDate();
         const users = await User.find().populate('group_ids');
         const birthdayUsers = users.filter(user => user.birthday?.slice(5) === currentMD && user.lastCongratulatedYear !== currentYear);
         const groupMap = new Map();
@@ -67,5 +88,24 @@ export function createBirthdayService(bot) {
         }
     }
 
-    return { checkAndSendBirthdays, syncLocalBackup };
+    async function runScheduledCheck() {
+        const { hour } = getCurrentBirthdayDate();
+        if (hour < birthdayHour || scheduledCheckInProgress) return;
+        scheduledCheckInProgress = true;
+        try {
+            await checkAndSendBirthdays();
+        } catch (error) {
+            console.error('❌ Ошибка плановой проверки дней рождения:', error.message);
+        } finally {
+            scheduledCheckInProgress = false;
+        }
+    }
+
+    function startScheduler() {
+        runScheduledCheck();
+        const timer = setInterval(runScheduledCheck, 60_000);
+        timer.unref?.();
+    }
+
+    return { checkAndSendBirthdays, syncLocalBackup, startScheduler };
 }

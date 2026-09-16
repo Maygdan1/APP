@@ -73,6 +73,12 @@ function isInviteMessage(ctx) {
     return /^[A-Za-z0-9_-]{20,128}$/.test(token) ? { token } : null;
 }
 
+function isBotMentioned(ctx) {
+    const username = ctx.me?.username;
+    const text = ctx.message?.text || ctx.message?.caption || '';
+    return Boolean(username && new RegExp(`@${escapeRegExp(username)}\\b`, 'i').test(text));
+}
+
 async function consumeInvite(ctx, tokenValue) {
     const chat = ctx.chat;
     if (!chat || !['group', 'supergroup'].includes(chat.type)) return;
@@ -157,15 +163,16 @@ bot.on('my_chat_member', async ctx => {
     }
 });
 
-// Обрабатываем только одноразовые приглашения. Обычные сообщения и новые топики игнорируются.
+// Обрабатываем только сообщения с явным упоминанием бота.
 bot.on('message', async ctx => {
     if (ctx.chat?.type !== 'group' && ctx.chat?.type !== 'supergroup') return;
-    console.log(`Групповое сообщение получено: chat=${ctx.chat.id}, thread=${ctx.message?.message_thread_id ?? 'общий'}, type=${ctx.message?.text ? 'text' : 'other'}`);
+    if (!isBotMentioned(ctx)) return;
+
     const invite = isInviteMessage(ctx);
     if (invite) {
         await consumeInvite(ctx, invite.token);
     } else if (ctx.message?.text) {
-        console.log(`Приглашение не распознано: chat=${ctx.chat.id}, thread=${ctx.message.message_thread_id ?? 'общий'}`);
+        console.log(`Упоминание бота не содержит приглашения: chat=${ctx.chat.id}`);
     }
 });
 
@@ -175,6 +182,7 @@ mongoose.connect(mongoUri)
     .then(async () => {
         console.log('✅ База данных MongoDB успешно подключена');
         await birthdayService.syncLocalBackup();
+        birthdayService.startScheduler();
     })
     .catch(error => console.error('❌ Ошибка подключения к MongoDB:', error));
 

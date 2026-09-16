@@ -1,4 +1,4 @@
-import { API_URL, apiFetch, downloadFile, openFile, showAlert } from '../shared/telegram.js';
+import { API_URL, apiFetch, downloadFile, showAlert } from '../shared/telegram.js';
 import { escapeHtml, formatDateToRussian } from '../shared/utils.js';
 import { state, MONTHS_GENITIVE } from './state.js';
 

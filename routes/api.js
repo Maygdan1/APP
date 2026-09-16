@@ -41,7 +41,6 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     router.get('/files/:token', (req, res) => {
         const file = getStoredFile(req, res);
         if (!file) return;
-        downloads.delete(req.params.token);
         res.setHeader('Content-Type', file.contentType);
         const fallbackName = file.fileName.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
         const encodedName = encodeURIComponent(file.fileName);
