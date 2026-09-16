@@ -66,7 +66,7 @@ function isInviteMessage(ctx) {
     const username = ctx.me?.username;
     const text = ctx.message?.text || ctx.message?.caption || '';
     if (!username) return null;
-    const pattern = new RegExp(`@${escapeRegExp(username)}\\s*\\(([^)\\n]+)\\)`, 'i');
+    const pattern = new RegExp(`@?${escapeRegExp(username)}\\s*\\(\\s*([A-Za-z0-9_-]{20,128})\\s*\\)`, 'i');
     const match = text.match(pattern);
     if (!match) return null;
     const token = match[1].trim();
@@ -77,6 +77,15 @@ async function consumeInvite(ctx, tokenValue) {
     const chat = ctx.chat;
     if (!chat || !['group', 'supergroup'].includes(chat.type)) return;
     const topicId = ctx.message?.message_thread_id || null;
+    const botMember = await ctx.api.getChatMember(chat.id, ctx.me.id);
+    const canPost = botMember.status === 'administrator'
+        ? botMember.can_post_messages !== false
+        : botMember.status === 'creator';
+    const canUseTopic = !topicId || botMember.status === 'creator' || botMember.can_manage_topics === true;
+    if (!canPost || !canUseTopic) {
+        console.warn(`Приглашение отклонено: бот не администратор или нет прав, chat=${chat.id}, thread=${topicId ?? 'общий'}`);
+        return;
+    }
     const settings = await Settings.findOne({ key: 'service' }).lean();
     const pendingLimit = Math.min(settings?.maxPendingGroupRequests ?? 5, 10);
     if (settings && !settings.acceptGroupRequests) {
@@ -151,11 +160,12 @@ bot.on('my_chat_member', async ctx => {
 // Обрабатываем только одноразовые приглашения. Обычные сообщения и новые топики игнорируются.
 bot.on('message', async ctx => {
     if (ctx.chat?.type !== 'group' && ctx.chat?.type !== 'supergroup') return;
+    console.log(`Групповое сообщение получено: chat=${ctx.chat.id}, thread=${ctx.message?.message_thread_id ?? 'общий'}, type=${ctx.message?.text ? 'text' : 'other'}`);
     const invite = isInviteMessage(ctx);
     if (invite) {
         await consumeInvite(ctx, invite.token);
     } else if (ctx.message?.text) {
-        console.log(`Групповое сообщение без приглашения: chat=${ctx.chat.id}, thread=${ctx.message.message_thread_id ?? 'общий'}`);
+        console.log(`Приглашение не распознано: chat=${ctx.chat.id}, thread=${ctx.message.message_thread_id ?? 'общий'}`);
     }
 });
 

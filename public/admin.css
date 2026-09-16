@@ -401,6 +401,19 @@ select[multiple]::-webkit-scrollbar-thumb {
     justify-content: space-between;
 }
 
+.group-status {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.group-status-active { color: var(--success-color); }
+.group-status-disabled { color: var(--warning-color); }
+.group-status-pending { color: var(--hint-color); }
+
 .summary-trash {
     flex: 0 0 38px;
     width: 38px;

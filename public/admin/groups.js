@@ -58,9 +58,15 @@ export async function loadManagedGroups() {
     if (!response.ok) return;
     const { groups } = await response.json();
     const container = document.getElementById('managedGroups');
-    container.innerHTML = groups.map(group => `
+    container.innerHTML = groups.map(group => {
+        const status = group.active
+            ? { label: 'Активна', className: 'group-status-active' }
+            : group.registrationUsedAt || group.chatId
+                ? { label: 'Выключена', className: 'group-status-disabled' }
+                : { label: 'Ожидает подключения', className: 'group-status-pending' };
+        return `
         <details class="managed-group">
-            <summary><span>${escapeHtml(group.name)} (${group.active ? 'активна' : 'обнаружена'})</span><button class="summary-trash icon-action icon-trash" type="button" title="Удалить группу" aria-label="Удалить группу" data-delete-group="${group._id}">🗑️</button></summary>
+            <summary><span>${escapeHtml(group.name)} <em class="group-status ${status.className}">${status.label}</em></span><button class="summary-trash icon-action icon-trash" type="button" title="Удалить группу" aria-label="Удалить группу" data-delete-group="${group._id}">🗑️</button></summary>
             <div class="managed-group-body">
             <input data-group-name="${group._id}" value="${escapeHtml(group.name)}" placeholder="Название">
             <input data-group-topic="${group._id}" type="number" value="${group.topicId ?? ''}" placeholder="Topic ID">
@@ -75,7 +81,8 @@ export async function loadManagedGroups() {
                 <button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-save-group="${group._id}">☁</button>
             </div>
             </div>
-        </details>`).join('');
+            </details>`;
+            }).join('');
 }
 
 export async function saveManagedGroup(groupId) {
