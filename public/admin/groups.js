@@ -39,7 +39,6 @@ export async function deleteManagedGroup(groupId) {
         field.value = data.message;
         field.select();
         document.querySelector(`[data-copy-group="${groupId}"]`).disabled = false;
-        showAlert('Приглашение создано. Скопируйте его и передайте ответственному.');
     }
 
     export async function copyGroupInvite(groupId) {
@@ -52,7 +51,6 @@ export async function deleteManagedGroup(groupId) {
             field.select();
             document.execCommand('copy');
         }
-        showAlert('Приглашение скопировано');
     }
 
 export async function loadManagedGroups() {

@@ -64,12 +64,13 @@ function hashRegistrationKey(value) {
 
 function isInviteMessage(ctx) {
     const username = ctx.me?.username;
-    const text = ctx.message?.text || '';
+    const text = ctx.message?.text || ctx.message?.caption || '';
     if (!username) return null;
-    const pattern = new RegExp(`@${escapeRegExp(username)}\\(([^)\\n]+)\\)`, 'i');
+    const pattern = new RegExp(`@${escapeRegExp(username)}\\s*\\(([^)\\n]+)\\)`, 'i');
     const match = text.match(pattern);
     if (!match) return null;
-    return { token: match[1].trim() };
+    const token = match[1].trim();
+    return /^[A-Za-z0-9_-]{20,128}$/.test(token) ? { token } : null;
 }
 
 async function consumeInvite(ctx, tokenValue) {
@@ -78,33 +79,53 @@ async function consumeInvite(ctx, tokenValue) {
     const topicId = ctx.message?.message_thread_id || null;
     const settings = await Settings.findOne({ key: 'service' }).lean();
     const pendingLimit = Math.min(settings?.maxPendingGroupRequests ?? 5, 10);
-    if (settings && (!settings.acceptGroupRequests || pendingLimit <= await Group.countDocuments({ active: false, blocked: false, registrationUsedAt: { $ne: null } }))) return;
-        const invite = await GroupInvite.findOne({ tokenHash: hashRegistrationKey(tokenValue), consumedAt: null });
-    if (!invite) return;
-        const invitedGroup = await Group.findById(invite.groupId).lean();
-        if (!invitedGroup || invitedGroup.blocked || invitedGroup.active) return;
+    if (settings && !settings.acceptGroupRequests) {
+        console.warn(`Приглашение отклонено: заявки отключены, chat=${chat.id}`);
+        return;
+    }
+    const pendingCount = await Group.countDocuments({ active: false, blocked: false, registrationUsedAt: { $ne: null } });
+    if (settings && pendingLimit <= pendingCount) {
+        console.warn(`Приглашение отклонено: достигнут лимит заявок, chat=${chat.id}`);
+        return;
+    }
+    const invite = await GroupInvite.findOne({ tokenHash: hashRegistrationKey(tokenValue), consumedAt: null });
+    if (!invite) {
+        console.warn(`Приглашение отклонено: токен не найден или уже использован, chat=${chat.id}`);
+        return;
+    }
+    const invitedGroup = await Group.findById(invite.groupId).lean();
+    if (!invitedGroup || invitedGroup.blocked || invitedGroup.active) {
+        console.warn(`Приглашение отклонено: группа недоступна, chat=${chat.id}`);
+        return;
+    }
     const existingChat = await Group.findOne({ chatId: chat.id, _id: { $ne: invite.groupId } });
-    if (existingChat) return;
-        const consumedInvite = await GroupInvite.findOneAndUpdate(
+    if (existingChat) {
+        console.warn(`Приглашение отклонено: chat уже привязан к другой группе, chat=${chat.id}`);
+        return;
+    }
+    const consumedInvite = await GroupInvite.findOneAndUpdate(
             { _id: invite._id, consumedAt: null },
             { $set: { consumedAt: new Date(), consumedChatId: chat.id, consumedTopicId: topicId } },
             { new: true }
         );
-        if (!consumedInvite) return;
-        const telegramName = chat.title || String(chat.id);
-        const duplicateName = await Group.findOne({ name: telegramName, _id: { $ne: invite.groupId } }).lean();
-        const safeName = duplicateName ? `${telegramName} [${chat.id}]` : telegramName;
+    if (!consumedInvite) {
+        console.warn(`Приглашение отклонено: токен уже забрала другая обработка, chat=${chat.id}`);
+        return;
+    }
+    const telegramName = chat.title || String(chat.id);
+    const duplicateName = await Group.findOne({ name: telegramName, _id: { $ne: invite.groupId } }).lean();
+    const safeName = duplicateName ? `${telegramName} [${chat.id}]` : telegramName;
     await Group.findByIdAndUpdate(invite.groupId, {
         $set: {
             chatId: chat.id,
-                name: safeName,
+            name: safeName,
             topicId,
                 active: true,
             registrationUsedAt: new Date(),
             registrationRequestedBy: ctx.from?.id || null
         }
     });
-    console.log(`Принята заявка группы: ${chat.title || chat.id}, topic ${topicId ?? 'общий'}`);
+    console.log(`Группа активирована по приглашению: chat=${chat.id}, topic=${topicId ?? 'общий'}, group=${invite.groupId}`);
 }
 
 app.disable('x-powered-by');
@@ -133,6 +154,8 @@ bot.on('message', async ctx => {
     const invite = isInviteMessage(ctx);
     if (invite) {
         await consumeInvite(ctx, invite.token);
+    } else if (ctx.message?.text) {
+        console.log(`Групповое сообщение без приглашения: chat=${ctx.chat.id}, thread=${ctx.message.message_thread_id ?? 'общий'}`);
     }
 });
 
