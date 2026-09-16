@@ -22,11 +22,12 @@ function showFormButton() {
 
 nameInput.addEventListener('input', event => {
     event.target.value = event.target.value
-        .replace(/[^А-Яа-яЁё]/g, '')
-        .slice(0, 15);
-    if (event.target.value) {
-        event.target.value = event.target.value.charAt(0).toLocaleUpperCase('ru-RU') + event.target.value.slice(1).toLocaleLowerCase('ru-RU');
-    }
+        .replace(/[^А-Яа-яЁё ]/g, '')
+        .replace(/\s+/g, ' ')
+        .slice(0, 32);
+    event.target.value = event.target.value
+        .toLocaleLowerCase('ru-RU')
+        .replace(/(^| )([А-Яа-яЁё])/g, (_, prefix, letter) => `${prefix}${letter.toLocaleUpperCase('ru-RU')}`);
 });
 
 document.querySelectorAll('.student-tabs .tab-btn').forEach(button => button.addEventListener('click', async () => {
@@ -119,11 +120,14 @@ tg.MainButton.color = tg.themeParams.button_color || '#2481cc';
 tg.MainButton.hide();
 tg.MainButton.onClick(async () => {
     const username = nameInput.value.trim();
+    const [firstName, lastName] = username.split(' ');
     const groupId = document.getElementById('groupSelect').value;
     const dateString = birthdayInput.value;
     const [day, month, year] = dateString.split('.');
 
-    if (!/^[А-ЯЁ][а-яё]{1,14}$/.test(username)) return showAlert('Имя: 2–15 букв русского алфавита, первая буква заглавная');
+    if (!/^[А-ЯЁ][а-яё]{1,14} [А-ЯЁ][а-яё]{1,14}$/.test(username) || username.length > 32) {
+        return showAlert('Введите имя и фамилию: только кириллица, два слова, не более 32 символов');
+    }
     if (!/^\d{2}\.\d{2}\.\d{4}$/.test(dateString) || Number(day) > 31 || Number(month) > 12 || Number(year) < 1980 || Number(year) > 2015) {
         return showAlert('Пожалуйста, введите корректную дату рождения!');
     }
@@ -134,7 +138,7 @@ tg.MainButton.onClick(async () => {
         const response = await apiFetch(`${API_URL}/api/save-birthday`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, group_id: groupId, birthday: `${year}-${month}-${day}` })
+            body: JSON.stringify({ username, firstName, lastName, group_id: groupId, birthday: `${year}-${month}-${day}` })
         });
         if (!response.ok) throw new Error((await response.json()).error || 'Неизвестная ошибка');
         tg.MainButton.hide();

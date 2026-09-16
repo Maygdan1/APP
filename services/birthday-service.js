@@ -8,7 +8,8 @@ function escapeHtml(value) {
 }
 
 function getUserMention(user) {
-    const name = escapeHtml(user.username || 'Студент');
+    const fullName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username;
+    const name = escapeHtml(fullName || 'Студент');
     if (user.tg_username) return `<b>${name}</b> (@${escapeHtml(user.tg_username.replace('@', ''))})`;
     return `<b><a href="tg://user?id=${user.tg_id}">${name}</a></b>`;
 }

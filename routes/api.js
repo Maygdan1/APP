@@ -56,9 +56,11 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     });
 
     router.post('/save-birthday', requireSession, async (req, res) => {
-        const { username, birthday, group_id: groupId } = req.body;
-        if (!/^[А-ЯЁ][а-яё]{1,14}$/.test(username || '') || !birthday || !mongoose.isValidObjectId(groupId)) {
-            return res.status(400).json({ error: 'Имя: 2–15 букв русского алфавита, первая буква заглавная' });
+        const { username, firstName, lastName, birthday, group_id: groupId } = req.body;
+        const fullNamePattern = /^[А-ЯЁ][а-яё]{1,14} [А-ЯЁ][а-яё]{1,14}$/;
+        const namePattern = /^[А-ЯЁ][а-яё]{1,14}$/;
+        if (!fullNamePattern.test(username || '') || (username || '').length > 32 || !namePattern.test(firstName || '') || !namePattern.test(lastName || '') || username !== `${firstName} ${lastName}` || !birthday || !mongoose.isValidObjectId(groupId)) {
+            return res.status(400).json({ error: 'Введите имя и фамилию: два слова на кириллице, не более 32 символов' });
         }
         try {
             const group = await Group.findOne({ _id: groupId, active: true });
@@ -68,7 +70,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
             if (!existingUser && settings && !settings.acceptNewUsers) {
                 return res.status(423).json({ error: 'Регистрация новых пользователей временно отключена' });
             }
-            const update = { username, birthday, ...(req.auth.telegramUsername ? { tg_username: req.auth.telegramUsername } : {}) };
+            const update = { username, firstName, lastName, birthday, ...(req.auth.telegramUsername ? { tg_username: req.auth.telegramUsername } : {}) };
             const user = existingUser?.role === 'mentor'
                 ? Object.assign(existingUser, update)
                 : await User.findOneAndUpdate({ tg_id: req.auth.tgId }, { ...update, group_ids: [group._id] }, { upsert: true, new: true });
