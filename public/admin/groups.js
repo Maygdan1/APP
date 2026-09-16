@@ -1,3 +1,4 @@
+import { escapeHtml } from '../shared/utils.js';
 import { API_URL, apiFetch, downloadFile, openFile, showAlert } from '../shared/telegram.js';
 
 export async function loadServiceSettings() {
@@ -61,19 +62,20 @@ export async function loadManagedGroups() {
     const container = document.getElementById('managedGroups');
     container.innerHTML = groups.map(group => `
         <details class="managed-group">
-            <summary><span>${group.name} (${group.active ? 'активна' : 'обнаружена'})</span><button class="summary-trash icon-action icon-trash" type="button" title="Удалить группу" aria-label="Удалить группу" data-delete-group="${group._id}">🗑️</button></summary>
+            <summary><span>${escapeHtml(group.name)} (${group.active ? 'активна' : 'обнаружена'})</span><button class="summary-trash icon-action icon-trash" type="button" title="Удалить группу" aria-label="Удалить группу" data-delete-group="${group._id}">🗑️</button></summary>
             <div class="managed-group-body">
-            <input data-group-name="${group._id}" value="${group.name}" placeholder="Название">
+            <input data-group-name="${group._id}" value="${escapeHtml(group.name)}" placeholder="Название">
             <input data-group-topic="${group._id}" type="number" value="${group.topicId ?? ''}" placeholder="Topic ID">
             <label><input data-group-active="${group._id}" type="checkbox" ${group.active ? 'checked' : ''}> Использовать для рассылки</label>
             <label><input data-group-blocked="${group._id}" type="checkbox" ${group.blocked ? 'checked' : ''}> Заблокировать заявки</label>
-            <button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-save-group="${group._id}">☁</button>
             <button class="btn-save" data-invite-group="${group._id}">Сгенерировать приглашение</button>
             <div class="invite-copy-row">
                 <input data-group-invite="${group._id}" readonly placeholder="Сообщение появится здесь">
                 <button class="copy-invite" type="button" data-copy-group="${group._id}" disabled title="Скопировать приглашение" aria-label="Скопировать приглашение">📋</button>
             </div>
-            <button class="icon-action icon-trash" title="Удалить группу" aria-label="Удалить группу" data-delete-group="${group._id}">🗑️</button>
+            <div class="managed-group-footer">
+                <button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-save-group="${group._id}">☁</button>
+            </div>
             </div>
         </details>`).join('');
 }

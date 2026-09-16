@@ -1,7 +1,6 @@
 import express from 'express';
 import { Bot, webhookCallback } from 'grammy';
 import mongoose from 'mongoose';
-import cors from 'cors';
 import crypto from 'crypto';
 import 'dotenv/config';
 import { createAuthService } from './services/auth.js';
@@ -26,7 +25,7 @@ const app = express();
 const auth = createAuthService({ token, sessionSecret });
 const birthdayService = createBirthdayService(bot);
 
-async function registerTelegramGroup(ctx, topicId = null) {
+async function registerTelegramGroup(ctx) {
     const chat = ctx.chat;
     if (!chat || !['group', 'supergroup'].includes(chat.type)) return;
     const settings = await Settings.findOne({ key: 'service' }).lean();
@@ -47,13 +46,12 @@ async function registerTelegramGroup(ctx, topicId = null) {
         {
             $set: {
                 name: safeName,
-                ...(topicId ? { topicId } : {})
             },
             $setOnInsert: { active: false }
         },
         { upsert: true, new: true, setDefaultsOnInsert: true }
     );
-    console.log(`Telegram-группа обнаружена: ${chat.title || chat.id}${topicId ? `, topic ${topicId}` : ''}`);
+    console.log(`Telegram-группа обнаружена: ${chat.title || chat.id}`);
 }
 
 function escapeRegExp(value) {
@@ -83,6 +81,8 @@ async function consumeInvite(ctx, tokenValue) {
     if (settings && (!settings.acceptGroupRequests || pendingLimit <= await Group.countDocuments({ active: false, blocked: false, registrationUsedAt: { $ne: null } }))) return;
         const invite = await GroupInvite.findOne({ tokenHash: hashRegistrationKey(tokenValue), consumedAt: null });
     if (!invite) return;
+        const invitedGroup = await Group.findById(invite.groupId).lean();
+        if (!invitedGroup || invitedGroup.blocked || invitedGroup.active) return;
     const existingChat = await Group.findOne({ chatId: chat.id, _id: { $ne: invite.groupId } });
     if (existingChat) return;
         const consumedInvite = await GroupInvite.findOneAndUpdate(
@@ -107,8 +107,14 @@ async function consumeInvite(ctx, tokenValue) {
     console.log(`Принята заявка группы: ${chat.title || chat.id}, topic ${topicId ?? 'общий'}`);
 }
 
-app.use(cors({ origin: '*', methods: ['GET', 'POST', 'OPTIONS'] }));
-app.use(express.json());
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+});
+app.use(express.json({ limit: '32kb' }));
 app.use(express.static('public'));
 app.get('/ping', (req, res) => res.status(200).send('OK'));
 app.use('/api', createApiRouter({ auth, birthdayService, bot, hashRegistrationKey }));
@@ -142,6 +148,7 @@ mongoose.connect(mongoUri)
 bot.api.setWebhook(webhookUrl).catch(error => console.error('❌ Webhook error:', error));
 bot.api.setMyCommands([], { scope: { type: 'all_group_chats' } })
     .catch(error => console.error('❌ Ошибка настройки команд групп:', error));
+bot.catch(error => console.error('❌ Ошибка Telegram update:', error.error || error));
 
 app.listen(port, () => {
     console.log(`🚀 Сервер запущен на порту ${port}`);

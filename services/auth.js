@@ -3,6 +3,13 @@ import { User } from '../models/User.js';
 
 export function createAuthService({ token, sessionSecret }) {
     const sessions = new Map();
+    const cleanupTimer = setInterval(() => {
+        const now = Date.now();
+        for (const [sessionToken, session] of sessions) {
+            if (session.expiresAt <= now) sessions.delete(sessionToken);
+        }
+    }, 60_000);
+    cleanupTimer.unref?.();
 
     async function getUserAuthContext(tgId) {
         const user = await User.findOne({ tg_id: Number(tgId) }).populate('group_ids').lean();
@@ -20,7 +27,7 @@ export function createAuthService({ token, sessionSecret }) {
         const params = new URLSearchParams(initData || '');
         const receivedHash = params.get('hash');
         const authDate = Number(params.get('auth_date'));
-        if (!receivedHash || !authDate || Date.now() / 1000 - authDate > 86400) return null;
+        if (!/^[a-f0-9]{64}$/i.test(receivedHash) || !authDate || Date.now() / 1000 - authDate > 3600) return null;
 
         params.delete('hash');
         const dataCheckString = [...params.entries()]
@@ -55,9 +62,13 @@ export function createAuthService({ token, sessionSecret }) {
             sessions.delete(tokenValue);
             return res.status(401).json({ error: 'Сессия истекла' });
         }
-        req.auth = await getUserAuthContext(session.userId);
-        req.auth.tgId = session.userId;
-        next();
+        try {
+            req.auth = await getUserAuthContext(session.userId);
+            req.auth.tgId = session.userId;
+            next();
+        } catch (error) {
+            res.status(500).json({ error: 'Не удалось проверить сессию' });
+        }
     }
 
     function requireAdmin(req, res, next) {

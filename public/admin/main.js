@@ -4,6 +4,7 @@ import { state } from './state.js';
 import { loadUsers, filterUsers, filterUsersByGroup, handleGroupSelect, handleRoleChange, saveUserData, deleteUser } from './users.js';
 import { renderCalendar } from './calendar.js';
 import { setupExportSelect, exportGroupData } from './export.js';
+import { escapeHtml } from '../shared/utils.js';
 
 let pendingConfirmation = null;
 
@@ -84,6 +85,7 @@ loadUsers().then(loaded => {
             ? '<option value="__mine__">Мои группы</option>'
             : '';
             calendarGroups.innerHTML = '<option value="">Все доступные группы</option>' + ownOption + availableGroups.map(group => `<option value="${group._id}">${group.name}</option>`).join('');
+                    calendarGroups.innerHTML = '<option value="">Все доступные группы</option>' + ownOption + availableGroups.map(group => `<option value="${group._id}">${escapeHtml(group.name)}</option>`).join('');
         const profileButton = document.querySelector('[data-tab="profileTab"]');
         const usersButton = document.querySelector('[data-tab="usersTab"]');
         const actionsButton = document.querySelector('[data-tab="actionsTab"]');

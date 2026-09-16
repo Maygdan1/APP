@@ -417,6 +417,12 @@ select[multiple]::-webkit-scrollbar-thumb {
     padding: 16px;
 }
 
+.managed-group-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2px;
+}
+
 .invite-copy-row {
     display: flex;
     gap: 8px;

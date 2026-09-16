@@ -12,11 +12,22 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     const router = express.Router();
     const { requireSession, requireAdmin } = auth;
     const downloads = new Map();
+    const cleanupDownloads = setInterval(() => {
+        const now = Date.now();
+        for (const [token, file] of downloads) {
+            if (file.expiresAt <= now) downloads.delete(token);
+        }
+    }, 60_000);
+    cleanupDownloads.unref?.();
 
     function createDownload(content, contentType, fileName) {
-        const token = crypto.randomBytes(32).toString('base64url');
-        downloads.set(token, { content, contentType, fileName, expiresAt: Date.now() + 5 * 60 * 1000 });
-        return { downloadUrl: `/api/files/${token}`, viewUrl: `/api/files/${token}/view` };
+        const expiresAt = Date.now() + 5 * 60 * 1000;
+        const downloadToken = crypto.randomBytes(32).toString('base64url');
+        const viewToken = crypto.randomBytes(32).toString('base64url');
+        const file = { content, contentType, fileName, expiresAt };
+        downloads.set(downloadToken, file);
+        downloads.set(viewToken, file);
+        return { downloadUrl: `/api/files/${downloadToken}`, viewUrl: `/api/files/${viewToken}/view` };
     }
 
     function getStoredFile(req, res) {
@@ -44,6 +55,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     router.get('/files/:token/view', (req, res) => {
         const file = getStoredFile(req, res);
         if (!file) return;
+        downloads.delete(req.params.token);
         res.setHeader('Content-Type', file.contentType);
         res.setHeader('Content-Disposition', 'inline');
         res.setHeader('Cache-Control', 'no-store');
@@ -116,6 +128,11 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
         const { target_user_id: targetUserId, role, group_ids: groupIds } = req.body;
         if (!targetUserId || !['child', 'mentor', 'admin'].includes(role) || !Array.isArray(groupIds)) return res.status(400).json({ error: 'Некорректные данные пользователя' });
         if (role === 'child' && groupIds.length !== 1) return res.status(400).json({ error: 'Студенту можно назначить только одну группу' });
+        const target = await User.findById(targetUserId).lean();
+        if (!target) return res.status(404).json({ error: 'Пользователь не найден' });
+        if (target.role === 'admin' && role !== 'admin' && await User.countDocuments({ role: 'admin' }) <= 1) {
+            return res.status(400).json({ error: 'Нельзя снять роль последнего администратора' });
+        }
         const validGroups = await Group.countDocuments({ _id: { $in: groupIds }, active: true });
         if (validGroups !== groupIds.length) return res.status(400).json({ error: 'Можно назначать только активные группы' });
         const user = await User.findOneAndUpdate({ _id: targetUserId }, { role, group_ids: groupIds }, { new: true });
@@ -221,15 +238,19 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     router.patch('/admin/groups/:groupId', requireSession, requireAdmin, async (req, res) => {
         const { name, chatId, topicId, active, blocked } = req.body || {};
         if (!mongoose.isValidObjectId(req.params.groupId)) return res.status(400).json({ error: 'Некорректная группа' });
-        const group = await Group.findByIdAndUpdate(req.params.groupId, {
-            ...(name ? { name } : {}),
-            ...(chatId !== undefined ? { chatId: Number(chatId) } : {}),
-            ...(topicId !== undefined ? { topicId: topicId === '' ? null : Number(topicId) } : {}),
-            ...(active !== undefined ? { active: Boolean(active) } : {}),
-            ...(blocked !== undefined ? { blocked: Boolean(blocked) } : {})
-        }, { new: true, runValidators: true });
-        if (!group) return res.status(404).json({ error: 'Группа не найдена' });
-        res.json({ success: true, group });
+        try {
+            const group = await Group.findByIdAndUpdate(req.params.groupId, {
+                ...(name ? { name } : {}),
+                ...(chatId !== undefined ? { chatId: Number(chatId) } : {}),
+                ...(topicId !== undefined ? { topicId: topicId === '' ? null : Number(topicId) } : {}),
+                ...(active !== undefined ? { active: Boolean(active) } : {}),
+                ...(blocked !== undefined ? { blocked: Boolean(blocked) } : {})
+            }, { new: true, runValidators: true });
+            if (!group) return res.status(404).json({ error: 'Группа не найдена' });
+            res.json({ success: true, group });
+        } catch (error) {
+            res.status(error.code === 11000 ? 409 : 500).json({ error: error.code === 11000 ? 'Название или чат уже используются' : 'Не удалось обновить группу' });
+        }
     });
 
     router.post('/admin/groups/:groupId/check', requireSession, requireAdmin, async (req, res) => {
