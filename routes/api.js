@@ -23,11 +23,9 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     function createDownload(content, contentType, fileName) {
         const expiresAt = Date.now() + 5 * 60 * 1000;
         const downloadToken = crypto.randomBytes(32).toString('base64url');
-        const viewToken = crypto.randomBytes(32).toString('base64url');
         const file = { content, contentType, fileName, expiresAt };
         downloads.set(downloadToken, file);
-        downloads.set(viewToken, file);
-        return { downloadUrl: `/api/files/${downloadToken}`, viewUrl: `/api/files/${viewToken}/view` };
+        return { downloadUrl: `/api/files/${downloadToken}`, fileName };
     }
 
     function getStoredFile(req, res) {
@@ -52,20 +50,10 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
         res.send(file.content);
     });
 
-    router.get('/files/:token/view', (req, res) => {
-        const file = getStoredFile(req, res);
-        if (!file) return;
-        downloads.delete(req.params.token);
-        res.setHeader('Content-Type', file.contentType);
-        res.setHeader('Content-Disposition', 'inline');
-        res.setHeader('Cache-Control', 'no-store');
-        res.send(file.content);
-    });
-
     router.post('/auth/session', (req, res) => {
         const telegramUser = auth.validateTelegramInitData(req.body?.initData);
         if (!telegramUser) return res.status(401).json({ error: 'Недействительные данные Telegram' });
-        res.json(auth.createSession(telegramUser.id));
+        res.json(auth.createSession(telegramUser.id, telegramUser));
     });
 
     router.post('/save-birthday', requireSession, async (req, res) => {
@@ -81,7 +69,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
             if (!existingUser && settings && !settings.acceptNewUsers) {
                 return res.status(423).json({ error: 'Регистрация новых пользователей временно отключена' });
             }
-            const update = { username, birthday };
+            const update = { username, birthday, ...(req.auth.telegramUsername ? { tg_username: req.auth.telegramUsername } : {}) };
             const user = existingUser?.role === 'mentor'
                 ? Object.assign(existingUser, update)
                 : await User.findOneAndUpdate({ tg_id: req.auth.tgId }, { ...update, group_ids: [group._id] }, { upsert: true, new: true });

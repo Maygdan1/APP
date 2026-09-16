@@ -46,12 +46,12 @@ export function createAuthService({ token, sessionSecret }) {
         }
     }
 
-    function createSession(userId) {
+    function createSession(userId, telegramUser = {}) {
         const expiresAt = Date.now() + 5 * 60 * 1000;
         const payload = `${userId}.${expiresAt}`;
         const signature = crypto.createHmac('sha256', sessionSecret).update(payload).digest('hex');
         const tokenValue = `${payload}.${signature}`;
-        sessions.set(tokenValue, { userId, expiresAt });
+        sessions.set(tokenValue, { userId, username: telegramUser.username || '', expiresAt });
         return { token: tokenValue, expiresAt };
     }
 
@@ -65,6 +65,11 @@ export function createAuthService({ token, sessionSecret }) {
         try {
             req.auth = await getUserAuthContext(session.userId);
             req.auth.tgId = session.userId;
+            req.auth.telegramUsername = session.username;
+            if (req.auth.user && session.username && req.auth.user.tg_username !== session.username) {
+                await User.updateOne({ _id: req.auth.user._id }, { $set: { tg_username: session.username } });
+                req.auth.user.tg_username = session.username;
+            }
             next();
         } catch (error) {
             res.status(500).json({ error: 'Не удалось проверить сессию' });

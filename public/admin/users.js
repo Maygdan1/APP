@@ -72,6 +72,7 @@ export function renderUsers(users) {
         const isAdmin = state.role === 'admin';
         const isMentor = user.role === 'mentor';
         const isAdminUser = user.role === 'admin';
+        const isCurrentUser = String(user._id) === String(state.currentUser?._id);
         const userGroups = user.group_ids || [];
         const groupsHtml = isAdmin
             ? state.groups.map(group => `
@@ -97,7 +98,7 @@ export function renderUsers(users) {
                 <option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Администратор</option>
             </select></div></div>
             <div class="field-group"><label>${isAdmin ? 'Привязанные группы:' : 'Ваши группы:'}</label><div class="${isAdmin ? 'groups-grid' : 'mentor-groups-container'}">${groupsHtml}</div></div>
-            ${isAdmin ? `<div class="card-actions"><button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-action="save-user" data-user-id="${user._id}">☁</button></div>` : '<div class="muted">🔒 Вашу роль и группы регулирует Главный Администратор</div>'}`;
+            ${isAdmin ? `<div class="card-actions"><button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-action="save-user" data-user-id="${user._id}">☁</button></div>` : isCurrentUser ? '<div class="muted">🔒 Вашу роль и группы регулирует только администратор</div>' : ''}`;
         container.appendChild(card);
     });
 }

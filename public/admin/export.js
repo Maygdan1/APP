@@ -16,8 +16,7 @@ export function exportGroupData() {
         .then(({ response, data }) => {
             if (!response.ok) return showAlert(data.error || 'Не удалось сформировать файл');
             const result = document.getElementById('exportResult');
-            result.innerHTML = `<div class="file-card"><span class="file-icon">📄</span><span class="file-meta"><b>Дни рождения.csv</b><small>Файл готов</small></span><button class="file-open" type="button">Открыть</button><button class="file-download" type="button">⬇️</button></div>`;
-            result.querySelector('.file-open').addEventListener('click', () => openFile(new URL(data.viewUrl, API_URL).href));
+                result.innerHTML = `<div class="file-card"><span class="file-icon">📄</span><span class="file-meta"><b>Дни рождения.csv</b><small>CSV-файл готов</small></span><button class="file-download" type="button">⬇️</button></div>`;
             result.querySelector('.file-download').addEventListener('click', () => downloadFile(new URL(data.downloadUrl, API_URL).href, 'Дни_Рождения.csv'));
         })
         .catch(error => showAlert(`Ошибка экспорта: ${error.message}`));

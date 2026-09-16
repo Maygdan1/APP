@@ -117,5 +117,5 @@ export async function createBackup() {
     const result = document.getElementById('backupResult');
     const data = await response.json();
     result.innerHTML = `<div class="file-card"><span class="file-icon">🗄️</span><span class="file-meta"><b>birthday-users.json</b><small>JSON-файл готов</small></span><button class="file-download" type="button">⬇️</button></div>`;
-    result.querySelector('.file-download').addEventListener('click', () => downloadFile(new URL(data.downloadUrl, API_URL).href, 'birthday-users.json'));
+    result.querySelector('.file-download').addEventListener('click', () => downloadFile(new URL(data.downloadUrl, API_URL).href, data.fileName || 'birthday-users.json'));
 }
