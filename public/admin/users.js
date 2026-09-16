@@ -44,7 +44,6 @@ export async function loadUsers() {
     state.ownGroups = (data.currentUser?.group_ids || []).map(group => String(group._id));
         state.adminCount = state.users.filter(user => user.role === 'admin').length;
     document.getElementById('controls').style.display = 'block';
-    document.getElementById('searchInput').style.display = state.role === 'mentor' ? 'none' : '';
     const groupFilter = document.getElementById('usersGroupFilter');
     const filterGroups = state.role === 'admin'
         ? state.groups
@@ -105,8 +104,13 @@ export function renderUsers(users) {
 
 export function filterUsers(query) {
     const normalized = query.toLowerCase();
+    const isTelegramUsernameSearch = normalized.startsWith('@');
     renderUsers(state.users.filter(user => {
-        const matchesText = (user.username || '').toLowerCase().includes(normalized) || (user.tg_username || '').toLowerCase().includes(normalized);
+        const name = (user.username || '').toLowerCase();
+        const telegramUsername = `@${(user.tg_username || '').replace(/^@/, '')}`.toLowerCase();
+        const matchesText = isTelegramUsernameSearch
+            ? telegramUsername.includes(normalized)
+            : name.includes(normalized);
         const matchesGroup = !state.selectedUsersGroup || (user.group_ids || []).some(group => String(group._id) === state.selectedUsersGroup);
         return matchesText && matchesGroup;
     }));
