@@ -81,5 +81,15 @@ export function createAuthService({ token, sessionSecret }) {
         next();
     }
 
-    return { createSession, getUserAuthContext, requireSession, requireAdmin, validateTelegramInitData };
+    function requireCronSecret(secret) {
+        return (req, res, next) => {
+            const provided = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+            if (!provided || provided.length !== secret.length || !crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(secret))) {
+                return res.status(401).json({ error: 'Требуется cron-аутентификация' });
+            }
+            next();
+        };
+    }
+
+    return { createSession, getUserAuthContext, requireSession, requireAdmin, requireCronSecret, validateTelegramInitData };
 }

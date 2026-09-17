@@ -14,10 +14,12 @@ const token = process.env.BOT_TOKEN;
 const mongoUri = process.env.MONGO_URI;
 const port = process.env.PORT || 10000;
 const sessionSecret = process.env.SESSION_SECRET;
-const webhookUrl = `https://birthday-bot-backend-jl75.onrender.com/webhook/${token}`;
+const cronSecret = process.env.CRON_SECRET;
+const cronPath = process.env.CRON_PATH;
+const webhookUrl = process.env.WEBHOOK_URL || `https://birthday-bot-backend-jl75.onrender.com/webhook/${token}`;
 
-if (!token || !mongoUri || !sessionSecret) {
-    throw new Error('BOT_TOKEN, MONGO_URI и SESSION_SECRET обязательны');
+if (!token || !mongoUri || !sessionSecret || !cronSecret || !/^\/[a-zA-Z0-9_-]{24,}$/.test(cronPath || '')) {
+    throw new Error('BOT_TOKEN, MONGO_URI, SESSION_SECRET, CRON_SECRET и CRON_PATH обязательны');
 }
 
 const bot = new Bot(token);
@@ -153,7 +155,7 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '32kb' }));
 app.use(express.static('public'));
 app.get('/ping', (req, res) => res.status(200).send('OK'));
-app.use('/api', createApiRouter({ auth, birthdayService, bot, hashRegistrationKey }));
+app.use('/api', createApiRouter({ auth, birthdayService, bot, hashRegistrationKey, cronSecret, cronPath }));
 
 bot.on('my_chat_member', async ctx => {
     const status = ctx.myChatMember?.new_chat_member?.status;

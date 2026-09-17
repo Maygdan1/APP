@@ -57,10 +57,14 @@ public/*.css              стили пользовательского инте
 BOT_TOKEN=...
 MONGO_URI=...
 SESSION_SECRET=случайная_строка
+CRON_SECRET=секрет_для_Render_Cron
+CRON_PATH=случайный_путь_не_короче_24_символов
 PORT=10000
 ```
 
 Секреты не должны попадать в Git, README, скриншоты или публичные сообщения.
+
+Для Render Cron задайте `CRON_PATH` в Render и GitHub Secret как одну случайную строку без начального `/`. Workflow вызовет `https://ваш-сервис.onrender.com/api/<CRON_PATH>` с заголовком `Authorization: Bearer CRON_SECRET`. Этот endpoint не использует Telegram-сессию.
 
 ## 📦 Установка и локальный запуск
 

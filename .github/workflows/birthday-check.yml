@@ -1,0 +1,16 @@
+name: Birthday Check
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run birthday check
+        run: |
+          curl -fsS \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://birthday-bot-backend-jl75.onrender.com/api/${{ secrets.CRON_PATH }}"

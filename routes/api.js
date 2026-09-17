@@ -8,9 +8,9 @@ import { Group } from '../models/Group.js';
 import { Settings } from '../models/Settings.js';
 import { GroupInvite } from '../models/GroupInvite.js';
 
-export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKey }) {
+export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKey, cronSecret, cronPath }) {
     const router = express.Router();
-    const { requireSession, requireAdmin } = auth;
+    const { requireSession, requireAdmin, requireCronSecret } = auth;
     const downloads = new Map();
     const cleanupDownloads = setInterval(() => {
         const now = Date.now();
@@ -278,7 +278,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
         res.json({ success: true });
     });
 
-    router.get('/check-birthdays', requireSession, requireAdmin, async (req, res) => {
+    router.get(cronPath, requireCronSecret(cronSecret), async (req, res) => {
         try {
             await birthdayService.checkAndSendBirthdays();
             res.json({ success: true, message: 'Проверка выполнена' });
