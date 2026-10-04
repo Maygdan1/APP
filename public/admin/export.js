@@ -7,6 +7,8 @@ export function setupExportSelect() {
     select.innerHTML = state.role === 'admin' ? '<option value="all">Все группы (полная база)</option>' : '<option value="mentor_all">Все мои группы</option>';
     const groups = state.role === 'admin' ? state.groups : state.groups.filter(group => state.mentorGroups.some(id => String(id) === String(group._id)));
     groups.forEach(group => { select.innerHTML += `<option value="${group._id}">${escapeHtml(group.name)}</option>`; });
+    const trigger = document.getElementById('exportGroupTrigger');
+    if (trigger) trigger.textContent = select.options[select.selectedIndex]?.textContent || '';
 }
 
 export function exportGroupData() {

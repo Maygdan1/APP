@@ -226,7 +226,7 @@ body {
 .user-name { font-weight: 700; font-size: 18px; }
 .user-handle { font-size: 17px; color: var(--button-color); margin-left: 6px; font-weight: 600; }
 
-.role-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.role-badge { padding: 4px 10px; border-radius: 12px; font-size: 9px; font-weight: 700; text-transform: uppercase; }
 .role-picker { border: 0; cursor: pointer; font: inherit; margin-left: auto; }
 .role-picker-select { display: none; width: 116px; padding: 6px 24px 6px 8px; font-size: 12px; }
 .badge-child { background: rgba(36, 129, 204, 0.2); color: #4ba3e3; }
@@ -267,6 +267,21 @@ body {
 .select-wrapper-no-arrow::after {
     display: none;
 }
+
+.filter-trigger {
+    width: 100%;
+    text-align: left;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.controls-bar .field-label { margin-top: 2px; }
+.calendar-controls-card > .field-label + .select-wrapper + .field-label { margin-top: 2px; }
 
 select {
     width: 100%;
@@ -649,6 +664,17 @@ select[multiple]::-webkit-scrollbar-thumb {
     background: var(--bg-color);
     color: var(--text-color);
 }
+.choice-option {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    padding: 12px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    text-align: left;
+    font: inherit;
+}
+.choice-option.selected { background: var(--button-color); color: #fff; }
 .role-options input { width: 18px; height: 18px; }
 .role-modal-actions { display: flex; gap: 10px; margin-top: 18px; }
 .role-modal-actions .icon-action { flex: 1; width: auto; font-size: 14px; font-weight: 700; }

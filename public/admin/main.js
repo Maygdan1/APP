@@ -8,6 +8,7 @@ import { escapeHtml } from '../shared/utils.js';
 
 let pendingConfirmation = null;
 let pendingRoleUserId = null;
+let choiceTarget = null;
 
 export function requestDeleteConfirmation(action) {
     pendingConfirmation = action;
@@ -20,12 +21,30 @@ function switchTab(tabId) {
     if (tabId === 'calendarTab') renderCalendar();
 }
 
+function openChoiceModal(selectId, title) {
+    const select = document.getElementById(selectId);
+    choiceTarget = select;
+    document.getElementById('choiceModalTitle').textContent = title;
+    document.getElementById('choiceOptions').innerHTML = [...select.options].map(option => `
+        <button class="choice-option ${option.selected ? 'selected' : ''}" type="button" data-choice-value="${option.value}">${escapeHtml(option.textContent)}</button>`).join('');
+    document.getElementById('choiceModal').hidden = false;
+}
+
+function updateFilterTrigger(triggerId, selectId) {
+    const trigger = document.getElementById(triggerId);
+    const select = document.getElementById(selectId);
+    if (trigger && select) trigger.textContent = select.options[select.selectedIndex]?.textContent || '';
+}
+
 document.querySelectorAll('.tab-btn').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
 document.getElementById('calendarPeriod').addEventListener('change', renderCalendar);
 document.getElementById('calendarGroups').addEventListener('change', event => {
     state.selectedCalendarGroups = [event.target.value].filter(Boolean);
+    updateFilterTrigger('calendarGroupsTrigger', 'calendarGroups');
     renderCalendar();
 });
+document.getElementById('calendarGroupsTrigger').addEventListener('click', () => openChoiceModal('calendarGroups', 'Отображать'));
+document.getElementById('exportGroupTrigger').addEventListener('click', () => openChoiceModal('exportGroupSelect', 'Группа для выгрузки'));
 document.getElementById('searchInput').addEventListener('input', event => filterUsers(event.target.value));
 document.getElementById('usersGroupFilter').addEventListener('change', event => filterUsersByGroup(event.target.value));
 document.getElementById('exportButton').addEventListener('click', exportGroupData);
@@ -88,6 +107,16 @@ document.getElementById('roleOptions').innerHTML = `
     <label><input type="radio" name="role-choice" value="child"> 🎓 студент</label>
     <label><input type="radio" name="role-choice" value="mentor"> 👑 наставник</label>
     <label><input type="radio" name="role-choice" value="admin"> 🛡️ админ</label>`;
+
+document.getElementById('choiceOptions').addEventListener('click', event => {
+    const option = event.target.closest('[data-choice-value]');
+    if (!option || !choiceTarget) return;
+    choiceTarget.value = option.dataset.choiceValue;
+    choiceTarget.dispatchEvent(new Event('change', { bubbles: true }));
+    if (choiceTarget.id === 'exportGroupSelect') updateFilterTrigger('exportGroupTrigger', 'exportGroupSelect');
+    choiceTarget = null;
+    document.getElementById('choiceModal').hidden = true;
+});
 
 document.getElementById('confirmYes').addEventListener('click', async () => {
     const action = pendingConfirmation;

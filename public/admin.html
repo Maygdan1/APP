@@ -40,6 +40,12 @@
                 </div>
             </div>
         </div>
+        <div id="choiceModal" class="confirm-modal" hidden>
+            <div class="role-modal-card">
+                <h3 id="choiceModalTitle">Выберите значение</h3>
+                <div id="choiceOptions" class="role-options"></div>
+            </div>
+        </div>
         <div id="accessDenied" class="error-banner" style="display: none; padding: 20px; text-align: center; color: var(--danger-color);">
             ⛔ Доступ запрещен. Вы не являетесь администратором или наставником.
         </div>
@@ -72,7 +78,8 @@
                 </div>
                 <label for="calendarGroups" class="field-label">Отображать</label>
                 <div class="select-wrapper select-wrapper-no-arrow">
-                    <select id="calendarGroups"></select>
+                    <button id="calendarGroupsTrigger" class="filter-trigger" type="button">Все доступные группы</button>
+                    <select id="calendarGroups" hidden></select>
                 </div>
             </div>
 
@@ -88,7 +95,8 @@
                 <div class="field-group" style="margin-top: 14px;">
                     <label>Учебная группа:</label>
                     <div class="select-wrapper">
-                        <select id="exportGroupSelect">
+                        <button id="exportGroupTrigger" class="filter-trigger" type="button">Все группы</button>
+                        <select id="exportGroupSelect" hidden>
                             <!-- Заполняется динамически frontend-модулем панели -->
                         </select>
                     </div>
