@@ -120,6 +120,16 @@ document.getElementById('choiceOptions').addEventListener('click', event => {
     document.getElementById('choiceModal').hidden = true;
 });
 
+document.querySelectorAll('.confirm-modal').forEach(modal => {
+    modal.addEventListener('click', event => {
+        if (event.target !== modal) return;
+        modal.hidden = true;
+        if (modal.id === 'roleModal') pendingRoleUserId = null;
+        if (modal.id === 'choiceModal') choiceTarget = null;
+        if (modal.id === 'confirmModal') pendingConfirmation = null;
+    });
+});
+
 document.getElementById('confirmYes').addEventListener('click', async () => {
     const action = pendingConfirmation;
     pendingConfirmation = null;
