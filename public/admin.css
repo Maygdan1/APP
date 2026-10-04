@@ -179,6 +179,45 @@ body {
     margin-bottom: 12px; 
 }
 
+.user-identity {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-identity .user-name {
+    overflow-wrap: anywhere;
+}
+
+.user-identity .user-handle {
+    margin-left: 0;
+    overflow-wrap: anywhere;
+}
+
+.user-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    margin-bottom: 12px;
+}
+
+.user-meta-row .user-handle {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.role-select-compact {
+    margin-left: auto;
+    min-width: 128px;
+}
+
+.role-select-compact select {
+    padding: 7px 28px 7px 9px;
+    font-size: 12px;
+}
+
 .user-header-actions {
     display: flex;
     align-items: center;
@@ -471,6 +510,34 @@ select[multiple]::-webkit-scrollbar-thumb {
 }
 
 .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+
+.student-groups {
+    margin-top: 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    background: var(--bg-color);
+    overflow: hidden;
+}
+
+.student-groups summary {
+    cursor: pointer;
+    padding: 12px 14px;
+    color: var(--hint-color);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    list-style-position: inside;
+}
+
+.student-groups summary span {
+    float: right;
+    color: var(--button-color);
+}
+
+.student-groups .groups-grid {
+    padding: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .group-checkbox { 
     display: flex; 
     align-items: center; 

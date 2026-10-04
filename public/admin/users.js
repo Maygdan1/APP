@@ -73,30 +73,32 @@ export function renderUsers(users) {
         const isAdminUser = user.role === 'admin';
         const isCurrentUser = String(user._id) === String(state.currentUser?._id);
         const userGroups = user.group_ids || [];
-        const groupsHtml = isAdmin
-            ? state.groups.map(group => `
-                <label class="group-checkbox">
-                    <input type="checkbox" data-userid="${user._id}" value="${group._id}" ${userGroups.some(item => String(item._id) === String(group._id)) ? 'checked' : ''}>
-                    ${escapeHtml(group.name)}
-                </label>`).join('')
-            : userGroups.map(item => state.groups.find(group => String(group._id) === String(item._id))?.name)
+        const groupNames = userGroups.map(item => state.groups.find(group => String(group._id) === String(item._id))?.name)
                 .filter(Boolean).map(name => `<div style="background: var(--button-color, #2481cc); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; display: inline-block; margin: 2px 4px 2px 0;">📚 ${escapeHtml(name)}</div>`).join('') || '<span style="color: var(--hint-color); font-size: 13px;">Группы не назначены</span>';
+        const allGroupsHtml = state.groups.map(group => `
+            <label class="group-checkbox">
+                <input type="checkbox" data-userid="${user._id}" value="${group._id}" ${userGroups.some(item => String(item._id) === String(group._id)) ? 'checked' : ''}>
+                ${escapeHtml(group.name)}
+            </label>`).join('');
 
         const card = document.createElement('div');
         card.className = 'user-card';
         card.innerHTML = `
             <div class="user-header">
-                <div><span class="user-name">${escapeHtml(user.username || 'Без имени')}</span><span class="user-handle">${escapeHtml(user.tg_username ? `@${user.tg_username.replace('@', '')}` : 'нет @username')}</span></div>
+                <div class="user-identity">
+                    <span class="user-name">${escapeHtml(user.username || 'Без имени')}</span>
+                </div>
                 <div class="user-header-actions">
-                    <span class="role-badge ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}">${isAdminUser ? '🛡️ Администратор' : isMentor ? '👑 Наставник' : '🎓 Студент'}</span>
                     ${isAdmin && !(isAdminUser && (state.adminCount <= 1 || String(user._id) === String(state.currentUser?._id))) ? `<button class="icon-action icon-trash" title="Удалить карточку" aria-label="Удалить карточку" data-action="delete-user" data-user-id="${user._id}">🗑️</button>` : ''}
                 </div>
             </div>
+            <div class="user-meta-row">
+                <span class="user-handle">${escapeHtml(user.tg_username ? `@${user.tg_username.replace('@', '')}` : 'нет @username')}</span>
+                <span class="role-badge ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}">${isAdminUser ? '🛡️ Администратор' : isMentor ? '👑 Наставник' : '🎓 Студент'}</span>
+                ${isAdmin ? `<div class="role-select-compact"><select id="role-${user._id}"><option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Администратор</option></select></div>` : ''}
+            </div>
             <div class="user-info">🎂 День рождения: <b>${formatDateToRussian(user.birthday, ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'])}</b></div>
-            <div class="field-group"><label>Роль в системе:</label><div class="select-wrapper"><select id="role-${user._id}" ${isAdmin ? '' : 'disabled'}>
-                <option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Администратор</option>
-            </select></div></div>
-            <div class="field-group"><label>${isAdmin ? 'Привязанные группы:' : 'Ваши группы:'}</label><div class="${isAdmin ? 'groups-grid' : 'mentor-groups-container'}">${groupsHtml}</div></div>
+            ${isAdmin ? `<details class="student-groups"><summary>Прикрепленные группы <span>${userGroups.length}</span></summary><div class="groups-grid">${allGroupsHtml}</div></details>` : `<div class="field-group"><label>Ваши группы:</label><div class="mentor-groups-container">${groupNames}</div></div>`}
             ${isAdmin ? `<div class="card-actions"><button class="icon-action icon-save" title="Сохранить" aria-label="Сохранить" data-action="save-user" data-user-id="${user._id}">☁</button></div>` : isCurrentUser ? '<div class="muted">🔒 Вашу роль и группы регулирует только администратор</div>' : ''}`;
         container.appendChild(card);
     });

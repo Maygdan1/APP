@@ -184,7 +184,6 @@ mongoose.connect(mongoUri)
     .then(async () => {
         console.log('✅ База данных MongoDB успешно подключена');
         await birthdayService.syncLocalBackup();
-        birthdayService.startScheduler();
     })
     .catch(error => console.error('❌ Ошибка подключения к MongoDB:', error));
 
