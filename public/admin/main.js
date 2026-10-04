@@ -72,9 +72,11 @@ document.getElementById('userList').addEventListener('click', event => {
 document.getElementById('roleSave').addEventListener('click', async () => {
     const selected = document.querySelector('#roleOptions input:checked');
     if (!selected || !pendingRoleUserId) return;
-    document.getElementById(`role-${pendingRoleUserId}`).value = selected.value;
+    const userId = pendingRoleUserId;
+    document.getElementById(`role-${userId}`).value = selected.value;
     document.getElementById('roleModal').hidden = true;
     pendingRoleUserId = null;
+    await saveUserData(userId);
 });
 
 document.getElementById('roleCancel').addEventListener('click', () => {
