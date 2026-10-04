@@ -38,6 +38,7 @@ function updateFilterTrigger(triggerId, selectId) {
 
 document.querySelectorAll('.tab-btn').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
 document.getElementById('calendarPeriod').addEventListener('change', renderCalendar);
+document.getElementById('calendarPeriodTrigger').addEventListener('click', () => openChoiceModal('calendarPeriod', 'Период отображения'));
 document.getElementById('calendarGroups').addEventListener('change', event => {
     state.selectedCalendarGroups = [event.target.value].filter(Boolean);
     updateFilterTrigger('calendarGroupsTrigger', 'calendarGroups');
@@ -114,6 +115,7 @@ document.getElementById('choiceOptions').addEventListener('click', event => {
     choiceTarget.value = option.dataset.choiceValue;
     choiceTarget.dispatchEvent(new Event('change', { bubbles: true }));
     if (choiceTarget.id === 'exportGroupSelect') updateFilterTrigger('exportGroupTrigger', 'exportGroupSelect');
+    if (choiceTarget.id === 'calendarPeriod') updateFilterTrigger('calendarPeriodTrigger', 'calendarPeriod');
     choiceTarget = null;
     document.getElementById('choiceModal').hidden = true;
 });
