@@ -80,6 +80,10 @@ export function renderUsers(users) {
                 <input type="checkbox" data-userid="${user._id}" value="${group._id}" ${userGroups.some(item => String(item._id) === String(group._id)) ? 'checked' : ''}>
                 ${escapeHtml(group.name)}
             </label>`).join('');
+        const roleLabel = isAdminUser ? '🛡️ Админ' : isMentor ? '👑 Наставник' : '🎓 Студент';
+        const roleControl = isAdmin
+            ? `<button class="role-badge role-picker ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}" type="button" data-action="pick-role" data-user-id="${user._id}">${roleLabel}</button><select class="role-picker-select" id="role-${user._id}" aria-label="Роль пользователя"><option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Админ</option></select>`
+            : `<span class="role-badge ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}">${roleLabel}</span>`;
 
         const card = document.createElement('div');
         card.className = 'user-card';
@@ -94,8 +98,7 @@ export function renderUsers(users) {
             </div>
             <div class="user-meta-row">
                 <span class="user-handle">${escapeHtml(user.tg_username ? `@${user.tg_username.replace('@', '')}` : 'нет @username')}</span>
-                <span class="role-badge ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}">${isAdminUser ? '🛡️ Администратор' : isMentor ? '👑 Наставник' : '🎓 Студент'}</span>
-                ${isAdmin ? `<div class="role-select-compact"><select id="role-${user._id}"><option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Администратор</option></select></div>` : ''}
+                ${roleControl}
             </div>
             <div class="user-info">🎂 День рождения: <b>${formatDateToRussian(user.birthday, ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'])}</b></div>
             ${isAdmin ? `<details class="student-groups"><summary>Прикрепленные группы <span>${userGroups.length}</span></summary><div class="groups-grid">${allGroupsHtml}</div></details>` : `<div class="field-group"><label>Ваши группы:</label><div class="mentor-groups-container">${groupNames}</div></div>`}

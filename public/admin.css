@@ -227,6 +227,9 @@ body {
 .user-handle { font-size: 13px; color: var(--button-color); margin-left: 6px; font-weight: 600; }
 
 .role-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.role-picker { border: 0; cursor: pointer; font: inherit; }
+.role-picker-select { display: none; width: 116px; padding: 6px 24px 6px 8px; font-size: 12px; }
+.role-picker-select-visible { display: block; }
 .badge-child { background: rgba(36, 129, 204, 0.2); color: #4ba3e3; }
 .badge-mentor { background: rgba(217, 119, 6, 0.2); color: #f59e0b; }
 

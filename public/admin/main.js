@@ -54,6 +54,13 @@ document.getElementById('userList').addEventListener('change', event => {
 });
 
 document.getElementById('userList').addEventListener('click', event => {
+    const roleButton = event.target.closest('[data-action="pick-role"]');
+    if (roleButton) {
+        const roleSelect = document.getElementById(`role-${roleButton.dataset.userId}`);
+        roleSelect.classList.toggle('role-picker-select-visible');
+        if (roleSelect.classList.contains('role-picker-select-visible')) roleSelect.focus();
+        return;
+    }
     const button = event.target.closest('[data-action="save-user"]');
     if (button) saveUserData(button.dataset.userId);
     const deleteButton = event.target.closest('[data-action="delete-user"]');
