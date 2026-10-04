@@ -58,7 +58,8 @@
                 <input type="text" id="searchInput" placeholder="🔍 Поиск по имени или @username...">
                 <label class="field-label" for="usersGroupFilter">Группа</label>
                 <div class="select-wrapper select-wrapper-no-arrow">
-                    <select id="usersGroupFilter"></select>
+                    <button id="usersGroupTrigger" class="filter-trigger" type="button">Все доступные группы</button>
+                    <select id="usersGroupFilter" hidden></select>
                 </div>
             </div>
             <div id="userList" class="user-list"></div>

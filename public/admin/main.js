@@ -48,6 +48,7 @@ document.getElementById('calendarGroupsTrigger').addEventListener('click', () =>
 document.getElementById('exportGroupTrigger').addEventListener('click', () => openChoiceModal('exportGroupSelect', 'Группа для выгрузки'));
 document.getElementById('searchInput').addEventListener('input', event => filterUsers(event.target.value));
 document.getElementById('usersGroupFilter').addEventListener('change', event => filterUsersByGroup(event.target.value));
+document.getElementById('usersGroupTrigger').addEventListener('click', () => openChoiceModal('usersGroupFilter', 'Группа'));
 document.getElementById('exportButton').addEventListener('click', exportGroupData);
 document.getElementById('saveServiceSettings').addEventListener('click', saveServiceSettings);
 document.getElementById('createBackup').addEventListener('click', createBackup);
@@ -116,6 +117,7 @@ document.getElementById('choiceOptions').addEventListener('click', event => {
     choiceTarget.dispatchEvent(new Event('change', { bubbles: true }));
     if (choiceTarget.id === 'exportGroupSelect') updateFilterTrigger('exportGroupTrigger', 'exportGroupSelect');
     if (choiceTarget.id === 'calendarPeriod') updateFilterTrigger('calendarPeriodTrigger', 'calendarPeriod');
+    if (choiceTarget.id === 'usersGroupFilter') updateFilterTrigger('usersGroupTrigger', 'usersGroupFilter');
     choiceTarget = null;
     document.getElementById('choiceModal').hidden = true;
 });

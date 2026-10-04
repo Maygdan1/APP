@@ -49,6 +49,8 @@ export async function loadUsers() {
         ? state.groups
         : state.groups.filter(group => state.mentorGroups.some(id => String(id) === String(group._id)));
     groupFilter.innerHTML = '<option value="">Все доступные группы</option>' + filterGroups.map(group => `<option value="${group._id}">${escapeHtml(group.name)}</option>`).join('');
+    const groupTrigger = document.getElementById('usersGroupTrigger');
+    if (groupTrigger) groupTrigger.textContent = groupFilter.options[groupFilter.selectedIndex]?.textContent || '';
     const currentUserId = String(state.currentUser?._id || '');
     const orderedUsers = [...state.users].sort((left, right) => {
         if (String(left._id) === currentUserId) return -1;
