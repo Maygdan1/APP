@@ -7,6 +7,7 @@ import { setupExportSelect, exportGroupData } from './export.js';
 import { escapeHtml } from '../shared/utils.js';
 
 let pendingConfirmation = null;
+let pendingRoleUserId = null;
 
 export function requestDeleteConfirmation(action) {
     pendingConfirmation = action;
@@ -57,8 +58,9 @@ document.getElementById('userList').addEventListener('click', event => {
     const roleButton = event.target.closest('[data-action="pick-role"]');
     if (roleButton) {
         const roleSelect = document.getElementById(`role-${roleButton.dataset.userId}`);
-        roleSelect.classList.toggle('role-picker-select-visible');
-        if (roleSelect.classList.contains('role-picker-select-visible')) roleSelect.focus();
+        pendingRoleUserId = roleButton.dataset.userId;
+        document.querySelectorAll('#roleOptions input').forEach(input => { input.checked = input.value === roleSelect.value; });
+        document.getElementById('roleModal').hidden = false;
         return;
     }
     const button = event.target.closest('[data-action="save-user"]');
@@ -66,6 +68,24 @@ document.getElementById('userList').addEventListener('click', event => {
     const deleteButton = event.target.closest('[data-action="delete-user"]');
     if (deleteButton) requestDeleteConfirmation(() => deleteUser(deleteButton.dataset.userId));
 });
+
+document.getElementById('roleSave').addEventListener('click', async () => {
+    const selected = document.querySelector('#roleOptions input:checked');
+    if (!selected || !pendingRoleUserId) return;
+    document.getElementById(`role-${pendingRoleUserId}`).value = selected.value;
+    document.getElementById('roleModal').hidden = true;
+    pendingRoleUserId = null;
+});
+
+document.getElementById('roleCancel').addEventListener('click', () => {
+    pendingRoleUserId = null;
+    document.getElementById('roleModal').hidden = true;
+});
+
+document.getElementById('roleOptions').innerHTML = `
+    <label><input type="radio" name="role-choice" value="child"> 🎓 студент</label>
+    <label><input type="radio" name="role-choice" value="mentor"> 👑 наставник</label>
+    <label><input type="radio" name="role-choice" value="admin"> 🛡️ админ</label>`;
 
 document.getElementById('confirmYes').addEventListener('click', async () => {
     const action = pendingConfirmation;

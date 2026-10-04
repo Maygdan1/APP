@@ -80,9 +80,9 @@ export function renderUsers(users) {
                 <input type="checkbox" data-userid="${user._id}" value="${group._id}" ${userGroups.some(item => String(item._id) === String(group._id)) ? 'checked' : ''}>
                 ${escapeHtml(group.name)}
             </label>`).join('');
-        const roleLabel = isAdminUser ? '🛡️ Админ' : isMentor ? '👑 Наставник' : '🎓 Студент';
+        const roleLabel = isAdminUser ? '🛡️ админ' : isMentor ? '👑 наставник' : '🎓 студент';
         const roleControl = isAdmin
-            ? `<button class="role-badge role-picker ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}" type="button" data-action="pick-role" data-user-id="${user._id}">${roleLabel}</button><select class="role-picker-select" id="role-${user._id}" aria-label="Роль пользователя"><option value="child" ${user.role === 'child' ? 'selected' : ''}>Студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>Наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>Админ</option></select>`
+            ? `<button class="role-badge role-picker ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}" type="button" data-action="pick-role" data-user-id="${user._id}">${roleLabel}</button><select class="role-picker-select" id="role-${user._id}" aria-label="Роль пользователя"><option value="child" ${user.role === 'child' ? 'selected' : ''}>студент</option><option value="mentor" ${isMentor ? 'selected' : ''}>наставник</option><option value="admin" ${isAdminUser ? 'selected' : ''}>админ</option></select>`
             : `<span class="role-badge ${isMentor || isAdminUser ? 'badge-mentor' : 'badge-child'}">${roleLabel}</span>`;
 
         const card = document.createElement('div');
