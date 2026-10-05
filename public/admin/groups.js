@@ -71,6 +71,7 @@ export async function loadManagedGroups() {
             <input data-group-name="${group._id}" value="${escapeHtml(group.name)}" placeholder="Название">
             <input data-group-topic="${group._id}" type="number" value="${group.topicId ?? ''}" placeholder="Topic ID">
             <label><input data-group-active="${group._id}" type="checkbox" ${group.active ? 'checked' : ''}> Использовать для рассылки</label>
+            <label><input data-group-registration="${group._id}" type="checkbox" ${group.allowRegistration !== false ? 'checked' : ''}> Отобразить в форме</label>
             <label><input data-group-blocked="${group._id}" type="checkbox" ${group.blocked ? 'checked' : ''}> Заблокировать заявки</label>
             <button class="btn-save" data-invite-group="${group._id}">Сгенерировать приглашение</button>
             <div class="invite-copy-row">
@@ -93,6 +94,7 @@ export async function saveManagedGroup(groupId) {
             name: document.querySelector(`[data-group-name="${groupId}"]`).value.trim(),
             topicId: document.querySelector(`[data-group-topic="${groupId}"]`).value,
             active: document.querySelector(`[data-group-active="${groupId}"]`).checked,
+            allowRegistration: document.querySelector(`[data-group-registration="${groupId}"]`).checked,
             blocked: document.querySelector(`[data-group-blocked="${groupId}"]`).checked
         })
     });

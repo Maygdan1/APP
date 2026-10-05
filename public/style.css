@@ -153,6 +153,32 @@ input:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(36, 129, 204, 0.15);
 }
 
+.form-choice-trigger {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    background: var(--secondary-bg);
+    color: var(--text-color);
+    font-size: 16px;
+    text-align: left;
+}
+
+.choice-modal-card { max-width: 380px; }
+.choice-options { display: grid; gap: 10px; }
+.choice-option {
+    width: 100%;
+    padding: 12px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font: inherit;
+    text-align: left;
+}
+.choice-option.selected { background: var(--button-color); color: #fff; }
+.choice-empty { color: var(--hint-color); padding: 12px; }
+
 @media (min-width: 768px) {
     .app-container { max-width: 480px; padding: 40px; }
     .modal-card { max-width: 380px; }

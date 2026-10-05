@@ -5,6 +5,7 @@ const groupSchema = new mongoose.Schema({
     chatId: { type: Number, required: true, unique: true },
     topicId: { type: Number, default: null },
     active: { type: Boolean, default: true },
+    allowRegistration: { type: Boolean, default: true },
     blocked: { type: Boolean, default: false },
     registrationUsedAt: { type: Date, default: null },
     registrationRequestedBy: { type: Number, default: null }

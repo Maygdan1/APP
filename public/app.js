@@ -7,6 +7,26 @@ const user = tg.initDataUnsafe?.user;
 const birthdayInput = document.getElementById('birthdayInput');
 const nameInput = document.getElementById('nameInput');
 
+function openGroupChoice() {
+    const select = document.getElementById('groupSelect');
+    document.getElementById('groupChoiceOptions').innerHTML = [...select.options].map(option => `
+        <button type="button" class="choice-option ${option.selected ? 'selected' : ''}" data-group-value="${option.value}">${escapeHtml(option.textContent)}</button>`).join('') || '<div class="choice-empty">Нет доступных групп</div>';
+    document.getElementById('groupChoiceModal').style.display = 'flex';
+}
+
+document.getElementById('groupSelectTrigger').addEventListener('click', openGroupChoice);
+document.getElementById('groupChoiceOptions').addEventListener('click', event => {
+    const option = event.target.closest('[data-group-value]');
+    if (!option) return;
+    const select = document.getElementById('groupSelect');
+    select.value = option.dataset.groupValue;
+    document.getElementById('groupSelectTrigger').textContent = option.textContent;
+    document.getElementById('groupChoiceModal').style.display = 'none';
+});
+document.getElementById('groupChoiceModal').addEventListener('click', event => {
+    if (event.target === event.currentTarget) event.currentTarget.style.display = 'none';
+});
+
 function updateMainButton(tabId) {
     if (tabId === 'formTab') {
         tg.MainButton.setText('Сохранить');
@@ -101,6 +121,9 @@ async function loadGroups() {
     const { groups } = await response.json();
     document.getElementById('groupSelect').innerHTML = groups
         .map(group => `<option value="${group._id}">${escapeHtml(group.name)}</option>`).join('');
+    const select = document.getElementById('groupSelect');
+    const trigger = document.getElementById('groupSelectTrigger');
+    trigger.textContent = select.options[select.selectedIndex]?.textContent || 'Нет доступных групп';
 }
 
 birthdayInput.addEventListener('input', event => {
@@ -150,4 +173,8 @@ tg.MainButton.onClick(async () => {
     }
 });
 
-Promise.all([loadGroups(), loadUserData()]).catch(error => showAlert(error.message));
+Promise.all([loadGroups(), loadUserData()]).then(() => {
+    const select = document.getElementById('groupSelect');
+    const trigger = document.getElementById('groupSelectTrigger');
+    trigger.textContent = select.options[select.selectedIndex]?.textContent || 'Нет доступных групп';
+}).catch(error => showAlert(error.message));

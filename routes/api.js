@@ -63,7 +63,11 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
             return res.status(400).json({ error: 'Введите имя и фамилию: два слова на кириллице, не более 32 символов' });
         }
         try {
-            const group = await Group.findOne({ _id: groupId, active: true });
+            const group = await Group.findOne({
+                _id: groupId,
+                active: true,
+                allowRegistration: { $ne: false }
+            });
             if (!group) return res.status(400).json({ error: 'Группа не найдена' });
             const existingUser = await User.findOne({ tg_id: req.auth.tgId });
             const settings = await Settings.findOne({ key: 'service' }).lean();
@@ -89,7 +93,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     });
 
     router.get('/groups', requireSession, async (req, res) => {
-        res.json({ groups: await Group.find({ active: true }).sort({ name: 1 }).lean() });
+        res.json({ groups: await Group.find({ active: true, allowRegistration: { $ne: false } }).sort({ name: 1 }).lean() });
     });
 
     router.get('/calendar', requireSession, async (req, res) => {
@@ -225,7 +229,7 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
     });
 
     router.patch('/admin/groups/:groupId', requireSession, requireAdmin, async (req, res) => {
-        const { name, chatId, topicId, active, blocked } = req.body || {};
+        const { name, chatId, topicId, active, blocked, allowRegistration } = req.body || {};
         if (!mongoose.isValidObjectId(req.params.groupId)) return res.status(400).json({ error: 'Некорректная группа' });
         try {
             const group = await Group.findByIdAndUpdate(req.params.groupId, {
@@ -233,7 +237,8 @@ export function createApiRouter({ auth, birthdayService, bot, hashRegistrationKe
                 ...(chatId !== undefined ? { chatId: Number(chatId) } : {}),
                 ...(topicId !== undefined ? { topicId: topicId === '' ? null : Number(topicId) } : {}),
                 ...(active !== undefined ? { active: Boolean(active) } : {}),
-                ...(blocked !== undefined ? { blocked: Boolean(blocked) } : {})
+                ...(blocked !== undefined ? { blocked: Boolean(blocked) } : {}),
+                ...(allowRegistration !== undefined ? { allowRegistration: Boolean(allowRegistration) } : {})
             }, { new: true, runValidators: true });
             if (!group) return res.status(404).json({ error: 'Группа не найдена' });
             res.json({ success: true, group });
